@@ -1,0 +1,52 @@
+apply plugin: 'com.android.application'
+apply plugin: 'android-apt'
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion "23.0.0 rc3"
+
+    defaultConfig {
+        applicationId "com.udacity.jcmb.popularmovies"
+        minSdkVersion 15
+        targetSdkVersion 22
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url "https://jitpack.io"
+    }
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    apt "org.androidannotations:androidannotations:3.2"
+    compile 'org.androidannotations:androidannotations-api:3.2'
+    compile 'com.android.support:appcompat-v7:22.2.0'
+    compile 'com.android.support:support-v4:22.2.0'
+    compile 'com.github.bumptech.glide:glide:3.6.0'
+    compile 'com.github.ozodrukh:CircularReveal:1.1.0@aar'
+    compile 'com.squareup.okhttp:okhttp:2.4.0'
+    compile 'com.android.support:recyclerview-v7:22.2.0'
+    compile 'com.android.support:cardview-v7:22.2.0'
+    compile 'com.android.support:design:22.2.0'
+}
+
+apt {
+    arguments {
+        androidManifestFile variant.outputs[0].processResources.manifestFile
+        resourcePackageName "com.udacity.jcmb.popularmovies"
+    }
+}
