@@ -65,22 +65,18 @@ public class MovieView extends LinearLayout{
                 .centerCrop().into(ivMovie);
         loadBitmap(movie.getImageFileName());
 
+        int[] location = Utils.getLocationInWindow(this, getContext());
+
+        final int x = location[0] + getWidth()/2;
+
+        final int y = location[1] + getHeight()/2;
+
         setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                onMovieChosenListener.onMovieChosen(movie, 0, 0, color);
+                onMovieChosenListener.onMovieChosen(movie, x, y, color);
             }
         });
-
-//        final CustomGestureDetector detector = new CustomGestureDetector(movie,
-//                onMovieChosenListener);
-//        setOnTouchListener(new OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View view, MotionEvent motionEvent) {
-//                detector.onSingleTapUp(motionEvent);
-//                return true;
-//            }
-//        });
 
     }
 

@@ -1,5 +1,8 @@
 package com.udacity.jcmb.popularmovies.activities;
 
+import android.content.res.Configuration;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -8,6 +11,8 @@ import android.util.Log;
 import android.widget.FrameLayout;
 
 import com.udacity.jcmb.popularmovies.R;
+import com.udacity.jcmb.popularmovies.fragments.MovieDetailFragment;
+import com.udacity.jcmb.popularmovies.fragments.MovieDetailFragment_;
 import com.udacity.jcmb.popularmovies.interfaces.OnMovieChosenListener;
 import com.udacity.jcmb.popularmovies.model.Movie;
 
@@ -24,6 +29,8 @@ public class HomeActivity extends AppCompatActivity implements OnMovieChosenList
     @FragmentById
     Fragment fragmentMovies;
 
+    private MovieDetailFragment movieDetailFragment;
+
     @AfterViews
     void init()
     {
@@ -35,9 +42,7 @@ public class HomeActivity extends AppCompatActivity implements OnMovieChosenList
         FrameLayout movieDetail = (FrameLayout)findViewById(R.id.movieDetail);
         if(movieDetail != null)
         {
-            FragmentManager manager = getSupportFragmentManager();
-            FragmentTransaction transaction = manager.beginTransaction();
-//            transaction.add(R.id.movieDetail, )
+            placeMovieDetailFragment(movie, color);
         }
         else
         {
@@ -50,6 +55,40 @@ public class HomeActivity extends AppCompatActivity implements OnMovieChosenList
                     .name(movie.getName())
                     .color(color)
                     .start();
+        }
+    }
+
+    private void placeMovieDetailFragment(Movie movie, int color)
+    {
+        if(getSupportActionBar() != null)
+        {
+            getSupportActionBar().setBackgroundDrawable(new ColorDrawable(color));
+        }
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        movieDetailFragment = MovieDetailFragment_.builder()
+                .average(movie.getAverage())
+                .id(movie.getId())
+                .backdropFileName(movie.getBackdropFileName())
+                .imageFileName(movie.getImageFileName())
+                .build();
+        transaction.replace(R.id.movieDetail, movieDetailFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+        {
+            if(movieDetailFragment != null)
+            {
+                FragmentManager manager = getSupportFragmentManager();
+                FragmentTransaction transaction = manager.beginTransaction();
+                transaction.remove(movieDetailFragment);
+                transaction.commit();
+            }
         }
     }
 }

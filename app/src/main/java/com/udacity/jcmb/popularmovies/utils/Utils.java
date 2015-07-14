@@ -126,4 +126,11 @@ public class Utils {
 
         return Color.rgb(red, green, blue);
     }
+
+    public static int[] getLocationInWindow(View view, Context context)
+    {
+        int[] location = new int[2];
+        view.getLocationInWindow(location);
+        return location;
+    }
 }
