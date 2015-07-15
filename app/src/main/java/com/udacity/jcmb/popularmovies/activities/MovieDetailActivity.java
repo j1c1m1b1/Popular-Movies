@@ -23,6 +23,7 @@ import com.udacity.jcmb.popularmovies.connection.Requests;
 import com.udacity.jcmb.popularmovies.interfaces.ConnectionEventsListener;
 import com.udacity.jcmb.popularmovies.model.Movie;
 import com.udacity.jcmb.popularmovies.model.Review;
+import com.udacity.jcmb.popularmovies.model.Trailer;
 import com.udacity.jcmb.popularmovies.utils.AnimationUtils;
 import com.udacity.jcmb.popularmovies.utils.BlurUtils;
 import com.udacity.jcmb.popularmovies.views.ReviewView;
@@ -33,7 +34,6 @@ import com.udacity.jcmb.popularmovies.views.TrailerView_;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.App;
 import org.androidannotations.annotations.Background;
-import org.androidannotations.annotations.CheckedChange;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.UiThread;
@@ -52,6 +52,9 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class MovieDetailActivity extends AppCompatActivity
 {
 
+    private static final String MOVIE = "movie";
+    private static final String TRAILERS = "trailers";
+    private static final String REVIEWS = "reviews";
     @App
     PopularMovies app;
 
@@ -117,13 +120,29 @@ public class MovieDetailActivity extends AppCompatActivity
 
     private Movie movie;
 
-    private ArrayList<String> trailers;
+    private ArrayList<Trailer> trailers;
 
     private ArrayList<Review> reviews;
+
+    private boolean isFavorite;
+
+    private CompoundButton.OnCheckedChangeListener checkedChangeListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(savedInstanceState != null && savedInstanceState.containsKey(MOVIE))
+        {
+            movie = savedInstanceState.getParcelable(MOVIE);
+            if(savedInstanceState.containsKey(TRAILERS))
+            {
+                trailers = savedInstanceState.getParcelableArrayList(TRAILERS);
+            }
+            if(savedInstanceState.containsKey(REVIEWS))
+            {
+                reviews = savedInstanceState.getParcelableArrayList(REVIEWS);
+            }
+        }
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
         {
             finish();
@@ -135,7 +154,7 @@ public class MovieDetailActivity extends AppCompatActivity
     {
         trailers = new ArrayList<>();
         reviews = new ArrayList<>();
-        getMovieInfo();
+        getMovie();
         setSupportActionBar(toolbar);
         toolbar.setTitle(name);
         collapsingToolbarLayout.setContentScrimColor(color);
@@ -146,46 +165,39 @@ public class MovieDetailActivity extends AppCompatActivity
         {
             getWindow().setStatusBarColor(getResources().getColor(R.color.transparent));
         }
-        collapsingToolbarLayout.setTitle(toolbar.getTitle());
+
+        checkedChangeListener = new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked)
+                {
+                    chkFavorite.setText(R.string.is_favorite);
+                    Snackbar.make(coordinator, R.string.movie_is_favorite, Snackbar.LENGTH_LONG).show();
+                    saveMovie();
+                }
+                else
+                {
+                    chkFavorite.setText(R.string.save_favorite);
+                    Snackbar.make(coordinator, R.string.removed_favorite, Snackbar.LENGTH_LONG).show();
+                    removeMovie();
+                }
+            }
+        };
+
         tvAverage.setText(average + "/10");
         AnimationUtils.createCircularReveal(coordinator, x, y, this);
-    }
-
-    @CheckedChange(R.id.chkFavorite)
-    void onCheckedChanged(@SuppressWarnings("UnusedParameters") CompoundButton btn,
-                          boolean isChecked)
-    {
-        if(isChecked)
-        {
-            chkFavorite.setText(R.string.is_favorite);
-            Snackbar.make(coordinator, R.string.movie_is_favorite, Snackbar.LENGTH_LONG).show();
-            saveMovie();
-        }
-        else
-        {
-            chkFavorite.setText(R.string.save_favorite);
-            Snackbar.make(coordinator, R.string.removed_favorite, Snackbar.LENGTH_LONG).show();
-            removeMovie();
-        }
     }
 
     @Background
     void saveMovie()
     {
-        app.saveMovie(movie);
+        app.saveMovie(movie, trailers, reviews);
     }
 
     @Background
     void removeMovie()
     {
         app.removeMovie(movie);
-    }
-
-    @Background
-    void isMovieFavorite()
-    {
-        boolean isFavorite = app.isFavorite(movie);
-        refreshCheckView(isFavorite);
     }
 
     @UiThread
@@ -196,6 +208,7 @@ public class MovieDetailActivity extends AppCompatActivity
         {
             chkFavorite.setText(R.string.is_favorite);
         }
+        chkFavorite.setOnCheckedChangeListener(checkedChangeListener);
     }
 
     @Background
@@ -219,67 +232,92 @@ public class MovieDetailActivity extends AppCompatActivity
         ivMovieBackground.setImageBitmap(bitmap);
     }
 
-    private void getMovieInfo()
-    {
-        getMovie();
-        getTrailers();
-        getReviews();
-    }
-
     @Background
     void getMovie()
     {
-        ConnectionEventsListener connectionEventsListener = new ConnectionEventsListener() {
-            @Override
-            public void onSuccess(JSONObject response) {
-                movie = ContentSolver.parseMovie(response);
+        isFavorite = app.isFavorite(id);
+        if(movie == null)
+        {
+            if(isFavorite)
+            {
+                movie = app.getMovie(id);
                 refreshMovieInfo();
             }
+            else
+            {
+                ConnectionEventsListener connectionEventsListener = new ConnectionEventsListener() {
+                    @Override
+                    public void onSuccess(JSONObject response) {
+                        movie = ContentSolver.parseMovie(response);
+                        refreshMovieInfo();
+                    }
 
-            @Override
-            public void onFail() {
+                    @Override
+                    public void onFail() {
 
+                    }
+                };
+
+                Requests.getMovie(id, connectionEventsListener);
             }
-        };
-
-        Requests.getMovie(id, connectionEventsListener);
+        }
+        else
+        {
+            refreshMovieInfo();
+        }
     }
 
     @Background
     void getTrailers()
     {
-        ConnectionEventsListener connectionEventsListener = new ConnectionEventsListener() {
-            @Override
-            public void onSuccess(JSONObject response) {
-                trailers = ContentSolver.parseTrailers(response);
-                refreshTrailers();
-            }
+        if(isFavorite)
+        {
+            trailers = app.getTrailersOfMovie(movie);
+            refreshTrailers();
+        }
+        else
+        {
+            ConnectionEventsListener connectionEventsListener = new ConnectionEventsListener() {
+                @Override
+                public void onSuccess(JSONObject response) {
+                    trailers = ContentSolver.parseTrailers(response, movie);
+                    refreshTrailers();
+                }
 
-            @Override
-            public void onFail() {
+                @Override
+                public void onFail() {
 
-            }
-        };
+                }
+            };
 
-        Requests.getMovieTrailers(id, connectionEventsListener);
+            Requests.getMovieTrailers(id, connectionEventsListener);
+        }
     }
 
     @Background
     void getReviews()
     {
-        ConnectionEventsListener connectionEventsListener = new ConnectionEventsListener() {
-            @Override
-            public void onSuccess(JSONObject response) {
-                reviews = ContentSolver.parseReviews(response);
-                refreshReviews();
-            }
+        if(isFavorite)
+        {
+            reviews = app.getReviewsOfMovie(movie);
+            refreshReviews();
+        }
+        else
+        {
+            ConnectionEventsListener connectionEventsListener = new ConnectionEventsListener() {
+                @Override
+                public void onSuccess(JSONObject response) {
+                    reviews = ContentSolver.parseReviews(response, movie);
+                    refreshReviews();
+                }
 
-            @Override
-            public void onFail() {
+                @Override
+                public void onFail() {
 
-            }
-        };
-        Requests.getMovieReviews(id, connectionEventsListener);
+                }
+            };
+            Requests.getMovieReviews(id, connectionEventsListener);
+        }
     }
 
     @UiThread
@@ -288,7 +326,9 @@ public class MovieDetailActivity extends AppCompatActivity
         tvYear.setText("" + movie.getYear());
         tvDuration.setText("" + movie.getDuration());
         tvSynopsis.setText(movie.getSynopsis());
-        isMovieFavorite();
+        refreshCheckView(isFavorite);
+        getTrailers();
+        getReviews();
     }
 
     @UiThread
@@ -297,10 +337,12 @@ public class MovieDetailActivity extends AppCompatActivity
         TrailerView trailerView;
         String pattern = "Trailer %d";
         String title, videoId;
+        Trailer trailer;
         for(int i = 0; i < trailers.size(); i++)
         {
             title = String.format(pattern, i + 1);
-            videoId = trailers.get(i);
+            trailer = trailers.get(i);
+            videoId = trailer.getTrailerId();
             trailerView = TrailerView_.build(this);
             trailerView.bind(videoId, title);
             layoutTrailers.addView(trailerView);
@@ -322,4 +364,11 @@ public class MovieDetailActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(MOVIE, movie);
+        outState.putParcelableArrayList(TRAILERS, trailers);
+        outState.putParcelableArrayList(REVIEWS, reviews);
+    }
 }

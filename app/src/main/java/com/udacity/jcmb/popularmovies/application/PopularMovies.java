@@ -4,6 +4,8 @@ import android.app.Application;
 
 import com.udacity.jcmb.popularmovies.db.PersistenceManager;
 import com.udacity.jcmb.popularmovies.model.Movie;
+import com.udacity.jcmb.popularmovies.model.Review;
+import com.udacity.jcmb.popularmovies.model.Trailer;
 
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EApplication;
@@ -19,9 +21,9 @@ public class PopularMovies extends Application {
     @Bean
     PersistenceManager persistenceManager;
 
-    public void saveMovie(Movie movie)
+    public void saveMovie(Movie movie, ArrayList<Trailer> trailers, ArrayList<Review> reviews)
     {
-        persistenceManager.saveMovie(movie);
+        persistenceManager.saveMovie(movie, trailers, reviews);
     }
 
     public void removeMovie(Movie movie)
@@ -39,4 +41,21 @@ public class PopularMovies extends Application {
         return persistenceManager.isFavorite(movie);
     }
 
+    public boolean isFavorite(String id)
+    {
+        return persistenceManager.isFavorite(id);
+    }
+
+    public Movie getMovie(String id) {
+        return persistenceManager.getMovie(id);
+    }
+
+    public ArrayList<Trailer> getTrailersOfMovie(Movie movie) {
+        return persistenceManager.getTrailersOfMovie(movie);
+    }
+
+    public ArrayList<Review> getReviewsOfMovie(Movie movie)
+    {
+        return persistenceManager.getReviewsOfMovie(movie);
+    }
 }

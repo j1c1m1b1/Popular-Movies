@@ -12,10 +12,10 @@ import com.j256.ormlite.table.DatabaseTable;
 @DatabaseTable(tableName = "favorite_movies")
 public class Movie implements Parcelable
 {
-    public static final Parcelable.Creator<Movie> CREATOR = new Creator<Movie>() {
+    public static final Creator<Movie> CREATOR = new Creator<Movie>() {
         @Override
-        public Movie createFromParcel(Parcel parcel) {
-            return new Movie(parcel);
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
         }
 
         @Override
@@ -23,25 +23,22 @@ public class Movie implements Parcelable
             return new Movie[size];
         }
     };
-
     @DatabaseField(id = true, columnName = "uid")
     private String id;
-
     @DatabaseField
     private String name;
-
     @DatabaseField
     private String imageFileName;
-
     @DatabaseField
     private String backdropFileName;
-
     @DatabaseField
     private double average;
-
     //ADDITIONAL INFO
+    @DatabaseField
     private String synopsis;
+    @DatabaseField
     private int year;
+    @DatabaseField
     private int duration;
 
     public Movie(String id, String name, String imageFileName, String backdropFileName, double average) {
@@ -53,11 +50,15 @@ public class Movie implements Parcelable
     }
 
     public Movie(Parcel parcel) {
-        this.id = parcel.readString();
-        this.name = parcel.readString();
-        this.imageFileName = parcel.readString();
-        this.backdropFileName = parcel.readString();
-        this.average = parcel.readDouble();
+
+        id = parcel.readString();
+        name = parcel.readString();
+        imageFileName = parcel.readString();
+        backdropFileName = parcel.readString();
+        average = parcel.readDouble();
+        synopsis = parcel.readString();
+        year = parcel.readInt();
+        duration = parcel.readInt();
     }
 
     /**
@@ -119,10 +120,14 @@ public class Movie implements Parcelable
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
+
         parcel.writeString(id);
         parcel.writeString(name);
         parcel.writeString(imageFileName);
         parcel.writeString(backdropFileName);
         parcel.writeDouble(average);
+        parcel.writeString(synopsis);
+        parcel.writeInt(year);
+        parcel.writeInt(duration);
     }
 }

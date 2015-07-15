@@ -2,6 +2,7 @@ package com.udacity.jcmb.popularmovies.connection;
 
 import com.udacity.jcmb.popularmovies.model.Movie;
 import com.udacity.jcmb.popularmovies.model.Review;
+import com.udacity.jcmb.popularmovies.model.Trailer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -86,17 +87,19 @@ public class ContentSolver {
         return movie;
     }
 
-    public static ArrayList<String> parseTrailers(JSONObject response) {
-        ArrayList<String> trailers = new ArrayList<>();
+    public static ArrayList<Trailer> parseTrailers(JSONObject response, Movie movie) {
+        ArrayList<Trailer> trailers = new ArrayList<>();
         try {
             JSONArray trailersArray = response.getJSONArray(RESULTS);
-            JSONObject trailer;
+            JSONObject jsonTrailer;
             String videoId;
+            Trailer trailer;
             for(int i = 0; i < trailersArray.length(); i++)
             {
-                trailer = trailersArray.getJSONObject(i);
-                videoId = trailer.getString(VIDEO_ID);
-                trailers.add(videoId);
+                jsonTrailer = trailersArray.getJSONObject(i);
+                videoId = jsonTrailer.getString(VIDEO_ID);
+                trailer = new Trailer(videoId, movie);
+                trailers.add(trailer);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -104,7 +107,7 @@ public class ContentSolver {
         return trailers;
     }
 
-    public static ArrayList<Review> parseReviews(JSONObject response) {
+    public static ArrayList<Review> parseReviews(JSONObject response, Movie movie) {
         ArrayList<Review> reviews = new ArrayList<>();
         try {
             JSONArray jsonReviews = response.getJSONArray(RESULTS);
@@ -117,7 +120,7 @@ public class ContentSolver {
                 jsonReview = jsonReviews.getJSONObject(i);
                 author = jsonReview.getString(AUTHOR);
                 content = jsonReview.getString(CONTENT);
-                review = new Review(author, content);
+                review = new Review(author, content, movie);
                 reviews.add(review);
             }
         } catch (JSONException e) {

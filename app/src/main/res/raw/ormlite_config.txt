@@ -1,5 +1,5 @@
 #
-# generated on 2015/07/15 09:36:18
+# generated on 2015/07/15 04:35:05
 #
 # --table-start--
 dataClass=com.udacity.jcmb.popularmovies.model.Movie
@@ -21,6 +21,56 @@ fieldName=backdropFileName
 # --field-end--
 # --field-start--
 fieldName=average
+# --field-end--
+# --field-start--
+fieldName=synopsis
+# --field-end--
+# --field-start--
+fieldName=year
+# --field-end--
+# --field-start--
+fieldName=duration
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################
+# --table-start--
+dataClass=com.udacity.jcmb.popularmovies.model.Review
+tableName=reviews
+# --table-fields-start--
+# --field-start--
+fieldName=id
+generatedId=true
+# --field-end--
+# --field-start--
+fieldName=author
+# --field-end--
+# --field-start--
+fieldName=content
+# --field-end--
+# --field-start--
+fieldName=movie
+columnName=movie_id
+foreign=true
+foreignAutoRefresh=true
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################
+# --table-start--
+dataClass=com.udacity.jcmb.popularmovies.model.Trailer
+tableName=trailers
+# --table-fields-start--
+# --field-start--
+fieldName=trailerId
+columnName=uid
+id=true
+# --field-end--
+# --field-start--
+fieldName=movie
+columnName=movie_id
+foreign=true
+foreignAutoRefresh=true
 # --field-end--
 # --table-fields-end--
 # --table-end--

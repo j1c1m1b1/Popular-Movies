@@ -2,6 +2,8 @@ package com.udacity.jcmb.popularmovies.db;
 
 import com.j256.ormlite.android.apptools.OrmLiteConfigUtil;
 import com.udacity.jcmb.popularmovies.model.Movie;
+import com.udacity.jcmb.popularmovies.model.Review;
+import com.udacity.jcmb.popularmovies.model.Trailer;
 
 import java.io.File;
 
@@ -15,7 +17,7 @@ public class DatabaseConfigUtil extends OrmLiteConfigUtil {
     private static final String RAW_FOLDER_LOCATION = "/app/src/main/res/raw/";
     private static final String FILE_NAME = "ormlite_config.txt";
 
-    private static final Class<?>[] classes = new Class[]{Movie.class};
+    private static final Class<?>[] classes = new Class[]{Movie.class, Review.class, Trailer.class};
 
     public static void main(String[] args) throws Exception {
 

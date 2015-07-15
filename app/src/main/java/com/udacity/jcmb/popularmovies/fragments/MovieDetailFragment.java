@@ -20,6 +20,7 @@ import com.udacity.jcmb.popularmovies.interfaces.ConnectionEventsListener;
 import com.udacity.jcmb.popularmovies.interfaces.OnFavoriteChangedListener;
 import com.udacity.jcmb.popularmovies.model.Movie;
 import com.udacity.jcmb.popularmovies.model.Review;
+import com.udacity.jcmb.popularmovies.model.Trailer;
 import com.udacity.jcmb.popularmovies.utils.AnimationUtils;
 import com.udacity.jcmb.popularmovies.utils.BlurUtils;
 import com.udacity.jcmb.popularmovies.views.ReviewView;
@@ -95,9 +96,11 @@ public class MovieDetailFragment extends Fragment {
 
     private Movie movie;
 
-    private ArrayList<String> trailers;
+    private ArrayList<Trailer> trailers;
 
     private ArrayList<Review> reviews;
+
+    private boolean isFavorite;
 
     private OnFavoriteChangedListener onFavoriteChangedListener;
 
@@ -106,7 +109,7 @@ public class MovieDetailFragment extends Fragment {
     {
         trailers = new ArrayList<>();
         reviews = new ArrayList<>();
-        getMovieInfo();
+        getMovie();
         Glide.with(this).load(Requests.IMAGES_URL + imageFileName).centerCrop().into(ivMovie);
         ivMovieBackground.setAlpha(0.8f);
         blurImage();
@@ -133,7 +136,7 @@ public class MovieDetailFragment extends Fragment {
     @Background
     void saveMovie()
     {
-        app.saveMovie(movie);
+        app.saveMovie(movie, trailers, reviews);
         onFavoriteChangedListener.onFavoriteChanged();
     }
 
@@ -142,13 +145,6 @@ public class MovieDetailFragment extends Fragment {
     {
         app.removeMovie(movie);
         onFavoriteChangedListener.onFavoriteChanged();
-    }
-
-    @Background
-    void isMovieFavorite()
-    {
-        boolean isFavorite = app.isFavorite(movie);
-        refreshCheckView(isFavorite);
     }
 
     @UiThread
@@ -182,67 +178,85 @@ public class MovieDetailFragment extends Fragment {
         ivMovieBackground.setImageBitmap(bitmap);
     }
 
-    private void getMovieInfo()
-    {
-        getMovie();
-        getTrailers();
-        getReviews();
-    }
-
     @Background
     void getMovie()
     {
-        ConnectionEventsListener connectionEventsListener = new ConnectionEventsListener() {
-            @Override
-            public void onSuccess(JSONObject response) {
-                movie = ContentSolver.parseMovie(response);
-                refreshMovieInfo();
-            }
+        isFavorite = app.isFavorite(id);
+        if(isFavorite)
+        {
+            movie = app.getMovie(id);
+            refreshMovieInfo();
+        }
+        else
+        {
+            ConnectionEventsListener connectionEventsListener = new ConnectionEventsListener() {
+                @Override
+                public void onSuccess(JSONObject response) {
+                    movie = ContentSolver.parseMovie(response);
+                    refreshMovieInfo();
+                }
 
-            @Override
-            public void onFail() {
+                @Override
+                public void onFail() {
 
-            }
-        };
+                }
+            };
 
-        Requests.getMovie(id, connectionEventsListener);
+            Requests.getMovie(id, connectionEventsListener);
+        }
     }
 
     @Background
     void getTrailers()
     {
-        ConnectionEventsListener connectionEventsListener = new ConnectionEventsListener() {
-            @Override
-            public void onSuccess(JSONObject response) {
-                trailers = ContentSolver.parseTrailers(response);
-                refreshTrailers();
-            }
+        if(isFavorite)
+        {
+            trailers = app.getTrailersOfMovie(movie);
+            refreshTrailers();
+        }
+        else
+        {
+            ConnectionEventsListener connectionEventsListener = new ConnectionEventsListener() {
+                @Override
+                public void onSuccess(JSONObject response) {
+                    trailers = ContentSolver.parseTrailers(response, movie);
+                    refreshTrailers();
+                }
 
-            @Override
-            public void onFail() {
+                @Override
+                public void onFail() {
 
-            }
-        };
+                }
+            };
 
-        Requests.getMovieTrailers(id, connectionEventsListener);
+            Requests.getMovieTrailers(id, connectionEventsListener);
+        }
     }
 
     @Background
     void getReviews()
     {
-        ConnectionEventsListener connectionEventsListener = new ConnectionEventsListener() {
-            @Override
-            public void onSuccess(JSONObject response) {
-                reviews = ContentSolver.parseReviews(response);
-                refreshReviews();
-            }
+        if(isFavorite)
+        {
+            reviews = app.getReviewsOfMovie(movie);
+            refreshReviews();
+        }
+        else
+        {
+            ConnectionEventsListener connectionEventsListener = new ConnectionEventsListener() {
+                @Override
+                public void onSuccess(JSONObject response) {
+                    reviews = ContentSolver.parseReviews(response, movie);
+                    refreshReviews();
+                }
 
-            @Override
-            public void onFail() {
+                @Override
+                public void onFail() {
 
-            }
-        };
-        Requests.getMovieReviews(id, connectionEventsListener);
+                }
+            };
+            Requests.getMovieReviews(id, connectionEventsListener);
+        }
     }
 
     @UiThread
@@ -256,7 +270,9 @@ public class MovieDetailFragment extends Fragment {
         tvYear.setText("" + movie.getYear());
         tvDuration.setText("" + movie.getDuration());
         tvSynopsis.setText(movie.getSynopsis());
-        isMovieFavorite();
+        refreshCheckView(isFavorite);
+        getTrailers();
+        getReviews();
     }
 
     @UiThread
@@ -265,10 +281,12 @@ public class MovieDetailFragment extends Fragment {
         TrailerView trailerView;
         String pattern = "Trailer %d";
         String title, videoId;
+        Trailer trailer;
         for(int i = 0; i < trailers.size(); i++)
         {
             title = String.format(pattern, i + 1);
-            videoId = trailers.get(i);
+            trailer = trailers.get(i);
+            videoId = trailer.getTrailerId();
             trailerView = TrailerView_.build(getActivity());
             trailerView.bind(videoId, title);
             layoutTrailers.addView(trailerView);
