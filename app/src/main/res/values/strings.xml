@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">Popular Movies</string>
-
     <string name="popularity">Popularity</string>
     <string name="ranking">User Rating</string>
+    <string name="save_favorite">Save as favorite</string>
+    <string name="is_favorite">Is Favorite</string>
+    <string name="favorites">Favorites</string>
+    <string name="movie_is_favorite">This movie is now favorite</string>
+    <string name="removed_favorite">Movie removed from favorites</string>
 </resources>

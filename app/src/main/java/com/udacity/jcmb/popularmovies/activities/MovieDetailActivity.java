@@ -1,35 +1,39 @@
 package com.udacity.jcmb.popularmovies.activities;
 
-import android.animation.Animator;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.Point;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
-import android.view.ViewAnimationUtils;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.udacity.jcmb.popularmovies.R;
+import com.udacity.jcmb.popularmovies.application.PopularMovies;
 import com.udacity.jcmb.popularmovies.connection.ContentSolver;
 import com.udacity.jcmb.popularmovies.connection.Requests;
 import com.udacity.jcmb.popularmovies.interfaces.ConnectionEventsListener;
 import com.udacity.jcmb.popularmovies.model.Movie;
 import com.udacity.jcmb.popularmovies.model.Review;
+import com.udacity.jcmb.popularmovies.utils.AnimationUtils;
 import com.udacity.jcmb.popularmovies.utils.BlurUtils;
-import com.udacity.jcmb.popularmovies.utils.Utils;
 import com.udacity.jcmb.popularmovies.views.ReviewView;
 import com.udacity.jcmb.popularmovies.views.ReviewView_;
 import com.udacity.jcmb.popularmovies.views.TrailerView;
 import com.udacity.jcmb.popularmovies.views.TrailerView_;
 
 import org.androidannotations.annotations.AfterViews;
+import org.androidannotations.annotations.App;
 import org.androidannotations.annotations.Background;
+import org.androidannotations.annotations.CheckedChange;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.UiThread;
@@ -40,7 +44,6 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import io.codetail.animation.SupportAnimator;
 
 /**
  * @author Julio Mendoza on 7/9/15.
@@ -48,6 +51,9 @@ import io.codetail.animation.SupportAnimator;
 @EActivity(R.layout.activity_movie_detail)
 public class MovieDetailActivity extends AppCompatActivity
 {
+
+    @App
+    PopularMovies app;
 
     @ViewById
     CoordinatorLayout coordinator;
@@ -82,6 +88,9 @@ public class MovieDetailActivity extends AppCompatActivity
     @ViewById
     LinearLayout layoutReviews;
 
+    @ViewById
+    AppCompatCheckBox chkFavorite;
+
     @Extra
     String id;
 
@@ -112,6 +121,14 @@ public class MovieDetailActivity extends AppCompatActivity
 
     private ArrayList<Review> reviews;
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+        {
+            finish();
+        }
+    }
 
     @AfterViews
     void init()
@@ -131,7 +148,54 @@ public class MovieDetailActivity extends AppCompatActivity
         }
         collapsingToolbarLayout.setTitle(toolbar.getTitle());
         tvAverage.setText(average + "/10");
-        createCircularReveal();
+        AnimationUtils.createCircularReveal(coordinator, x, y, this);
+    }
+
+    @CheckedChange(R.id.chkFavorite)
+    void onCheckedChanged(@SuppressWarnings("UnusedParameters") CompoundButton btn,
+                          boolean isChecked)
+    {
+        if(isChecked)
+        {
+            chkFavorite.setText(R.string.is_favorite);
+            Snackbar.make(coordinator, R.string.movie_is_favorite, Snackbar.LENGTH_LONG).show();
+            saveMovie();
+        }
+        else
+        {
+            chkFavorite.setText(R.string.save_favorite);
+            Snackbar.make(coordinator, R.string.removed_favorite, Snackbar.LENGTH_LONG).show();
+            removeMovie();
+        }
+    }
+
+    @Background
+    void saveMovie()
+    {
+        app.saveMovie(movie);
+    }
+
+    @Background
+    void removeMovie()
+    {
+        app.removeMovie(movie);
+    }
+
+    @Background
+    void isMovieFavorite()
+    {
+        boolean isFavorite = app.isFavorite(movie);
+        refreshCheckView(isFavorite);
+    }
+
+    @UiThread
+    void refreshCheckView(boolean isFavorite)
+    {
+        chkFavorite.setChecked(isFavorite);
+        if(isFavorite)
+        {
+            chkFavorite.setText(R.string.is_favorite);
+        }
     }
 
     @Background
@@ -153,44 +217,6 @@ public class MovieDetailActivity extends AppCompatActivity
     void applyBlurred(Bitmap bitmap)
     {
         ivMovieBackground.setImageBitmap(bitmap);
-    }
-
-    void createCircularReveal()
-    {
-        coordinator.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-            @Override
-            public void onLayoutChange(View v, int left, int top, int right, int bottom,
-                                       int oldLeft, int oldTop, int oldRight, int oldBottom)
-            {
-
-                if(x == 0)
-                {
-                    Point size = Utils.getScreenDimensions(MovieDetailActivity.this);
-                    x = size.x / 2;
-                    y = size.y / 2;
-                }
-
-
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-                {
-                    Animator anim = ViewAnimationUtils.createCircularReveal(coordinator, x, y,
-                            0, coordinator.getWidth());
-                    anim.setDuration(500);
-                    coordinator.setVisibility(View.VISIBLE);
-                    anim.start();
-                }
-                else
-                {
-                    SupportAnimator anim = io.codetail.animation.ViewAnimationUtils.
-                            createCircularReveal(coordinator, x, y, 0, coordinator.getWidth());
-                    anim.setDuration(500);
-                    coordinator.setVisibility(View.VISIBLE);
-                    anim.start();
-                }
-
-                coordinator.removeOnLayoutChangeListener(this);
-            }
-        });
     }
 
     private void getMovieInfo()
@@ -262,6 +288,7 @@ public class MovieDetailActivity extends AppCompatActivity
         tvYear.setText("" + movie.getYear());
         tvDuration.setText("" + movie.getDuration());
         tvSynopsis.setText(movie.getSynopsis());
+        isMovieFavorite();
     }
 
     @UiThread

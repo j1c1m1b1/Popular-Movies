@@ -103,34 +103,33 @@ public class Utils {
         int redBucket = 0;
         int greenBucket = 0;
         int blueBucket = 0;
-        int pixelCount = 0;
-
-        for (int y = 0; y < bitmap.getHeight(); y++)
+        int pixelCount = 1;
+        if(bitmap != null)
         {
-            for (int x = 0; x < bitmap.getWidth(); x++)
+            pixelCount = 0;
+            for (int y = 0; y < bitmap.getHeight(); y++)
             {
-                int c = bitmap.getPixel(x, y);
+                for (int x = 0; x < bitmap.getWidth(); x++)
+                {
+                    int c = bitmap.getPixel(x, y);
 
-                pixelCount++;
-                redBucket += Color.red(c);
-                greenBucket += Color.green(c);
-                blueBucket += Color.blue(c);
-                // does alpha matter?
+                    pixelCount++;
+                    redBucket += Color.red(c);
+                    greenBucket += Color.green(c);
+                    blueBucket += Color.blue(c);
+                }
             }
         }
-
-
         int red = redBucket/pixelCount;
         int green = greenBucket/pixelCount;
         int blue = blueBucket/pixelCount;
-
         return Color.rgb(red, green, blue);
     }
 
     public static int[] getLocationInWindow(View view, Context context)
     {
         int[] location = new int[2];
-        view.getLocationInWindow(location);
+        view.getLocationOnScreen(location);
         return location;
     }
 }

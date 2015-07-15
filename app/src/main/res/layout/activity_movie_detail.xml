@@ -96,6 +96,7 @@
                         android:id="@+id/tvAverage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
+
                 </LinearLayout>
                 
                 <TextView
@@ -107,6 +108,12 @@
                     android:padding="4dp"/>
 
             </LinearLayout>
+
+            <android.support.v7.widget.AppCompatCheckBox
+                android:id="@+id/chkFavorite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/save_favorite"/>
 
             <View
                 android:layout_width="match_parent"

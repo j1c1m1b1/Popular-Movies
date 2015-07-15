@@ -3,9 +3,13 @@ package com.udacity.jcmb.popularmovies.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
+
 /**
  * @author Julio Mendoza on 7/9/15.
  */
+@DatabaseTable(tableName = "favorite_movies")
 public class Movie implements Parcelable
 {
     public static final Parcelable.Creator<Movie> CREATOR = new Creator<Movie>() {
@@ -19,13 +23,23 @@ public class Movie implements Parcelable
             return new Movie[size];
         }
     };
+
+    @DatabaseField(id = true, columnName = "uid")
     private String id;
+
+    @DatabaseField
     private String name;
+
+    @DatabaseField
     private String imageFileName;
+
+    @DatabaseField
     private String backdropFileName;
 
-    //ADDITIONAL INFO
+    @DatabaseField
     private double average;
+
+    //ADDITIONAL INFO
     private String synopsis;
     private int year;
     private int duration;
@@ -44,6 +58,14 @@ public class Movie implements Parcelable
         this.imageFileName = parcel.readString();
         this.backdropFileName = parcel.readString();
         this.average = parcel.readDouble();
+    }
+
+    /**
+     * Required by OrmLite
+     */
+    public Movie()
+    {
+
     }
 
     public String getId() {

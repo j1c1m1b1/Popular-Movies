@@ -7,14 +7,16 @@
 
     <style name="AppTheme.Base" parent="Theme.AppCompat">
         <item name="colorPrimary">@color/orange</item>
-        <item name="colorPrimaryDark">@color/dark_orange</item>
+        <item name="colorPrimaryDark">@color/orange_dark</item>
+        <item name="colorAccent">@color/orange_light</item>
         <item name="windowActionBar">true</item>
         <item name="windowNoTitle">false</item>
     </style>
 
     <style name="AppTheme.Base.NoActionBar" parent="Theme.AppCompat">
         <item name="colorPrimary">@color/orange</item>
-        <item name="colorPrimaryDark">@color/dark_orange</item>
+        <item name="colorPrimaryDark">@color/orange_dark</item>
+        <item name="colorAccent">@color/orange_light</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>

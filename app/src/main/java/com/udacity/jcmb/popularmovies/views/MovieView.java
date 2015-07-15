@@ -3,8 +3,6 @@ package com.udacity.jcmb.popularmovies.views;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.AttributeSet;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ImageView;
@@ -95,30 +93,5 @@ public class MovieView extends LinearLayout{
         }
 
         color = Utils.getAverageColorOfImage(resource);
-    }
-
-    private class CustomGestureDetector extends GestureDetector.SimpleOnGestureListener
-    {
-        private Movie movie;
-
-        private OnMovieChosenListener onMovieChosenListener;
-
-        public CustomGestureDetector(Movie movie, OnMovieChosenListener onMovieChosenListener)
-        {
-            this.movie = movie;
-            this.onMovieChosenListener = onMovieChosenListener;
-        }
-
-        @Override
-        public boolean onSingleTapUp(MotionEvent e) {
-                int x = (int) e.getRawX();
-
-                int y = (int) e.getRawY();
-
-                onMovieChosenListener.onMovieChosen(movie, x, y, color);
-
-                return true;
-        }
-
     }
 }

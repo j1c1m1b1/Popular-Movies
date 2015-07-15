@@ -21,7 +21,9 @@ import org.androidannotations.annotations.ViewById;
 @EViewGroup(R.layout.view_trailer)
 public class TrailerView extends LinearLayout {
 
-    private static final String YOUTUBE_URI = "vnd.youtube://";
+//    private static final String YOUTUBE_URI = "vnd.youtube://";
+
+    private static final String YOUTUBE_URI = "http://youtube.com/watch?v=";
 
     @ViewById
     TextView tvTitle;

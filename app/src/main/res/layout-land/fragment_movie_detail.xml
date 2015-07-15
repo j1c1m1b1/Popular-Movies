@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:id="@+id/scrollRoot" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:visibility="invisible">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -54,6 +56,7 @@
                     android:id="@+id/tvAverage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
+
             </LinearLayout>
 
             <TextView
@@ -65,6 +68,13 @@
                 android:padding="4dp"/>
 
         </LinearLayout>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/chkFavorite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="@string/save_favorite"/>
 
         <View
             android:layout_width="match_parent"
