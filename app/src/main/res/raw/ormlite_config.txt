@@ -1,0 +1,27 @@
+#
+# generated on 2015/07/15 09:36:18
+#
+# --table-start--
+dataClass=com.udacity.jcmb.popularmovies.model.Movie
+tableName=favorite_movies
+# --table-fields-start--
+# --field-start--
+fieldName=id
+columnName=uid
+id=true
+# --field-end--
+# --field-start--
+fieldName=name
+# --field-end--
+# --field-start--
+fieldName=imageFileName
+# --field-end--
+# --field-start--
+fieldName=backdropFileName
+# --field-end--
+# --field-start--
+fieldName=average
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################
