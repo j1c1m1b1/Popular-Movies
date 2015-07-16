@@ -1,18 +1,16 @@
 package com.udacity.jcmb.popularmovies.model;
 
+import android.content.ContentValues;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
+import com.udacity.jcmb.popularmovies.db.contracts.PopularMoviesContract;
 
 /**
  * @author Julio Mendoza on 7/15/15.
  */
-@DatabaseTable(tableName = "trailers")
 public class Trailer implements Parcelable{
 
-    public static final String MOVIE_ID = "movie_id";
     public static final Creator<Trailer> CREATOR = new Creator<Trailer>() {
         @Override
         public Trailer createFromParcel(Parcel in) {
@@ -24,10 +22,8 @@ public class Trailer implements Parcelable{
             return new Trailer[size];
         }
     };
-    @DatabaseField(id = true, columnName = "uid")
+
     private String trailerId;
-    @DatabaseField(foreign = true, foreignAutoRefresh = true, columnName = MOVIE_ID)
-    private Movie movie;
 
     /**
      * Required by ORMLite
@@ -35,14 +31,12 @@ public class Trailer implements Parcelable{
     public Trailer() {
     }
 
-    public Trailer(String trailerId, Movie movie) {
+    public Trailer(String trailerId) {
         this.trailerId = trailerId;
-        this.movie = movie;
     }
 
     protected Trailer(Parcel in) {
         trailerId = in.readString();
-        movie = in.readParcelable(Movie.class.getClassLoader());
     }
 
     public String getTrailerId() {
@@ -57,6 +51,13 @@ public class Trailer implements Parcelable{
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(trailerId);
-        dest.writeParcelable(movie, flags);
+    }
+
+    public ContentValues toValues(int movieId)
+    {
+        ContentValues values = new ContentValues();
+        values.put(PopularMoviesContract.TrailersEntry.COLUMN_TRAILER_ID, trailerId);
+        values.put(PopularMoviesContract.TrailersEntry.COLUMN_MOV_KEY, movieId);
+        return values;
     }
 }

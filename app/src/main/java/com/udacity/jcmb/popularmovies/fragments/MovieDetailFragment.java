@@ -17,7 +17,6 @@ import com.udacity.jcmb.popularmovies.application.PopularMovies;
 import com.udacity.jcmb.popularmovies.connection.ContentSolver;
 import com.udacity.jcmb.popularmovies.connection.Requests;
 import com.udacity.jcmb.popularmovies.interfaces.ConnectionEventsListener;
-import com.udacity.jcmb.popularmovies.interfaces.OnFavoriteChangedListener;
 import com.udacity.jcmb.popularmovies.model.Movie;
 import com.udacity.jcmb.popularmovies.model.Review;
 import com.udacity.jcmb.popularmovies.model.Trailer;
@@ -83,7 +82,7 @@ public class MovieDetailFragment extends Fragment {
     ScrollView scrollRoot;
 
     @FragmentArg
-    String id;
+    int id;
 
     @FragmentArg
     String imageFileName;
@@ -101,8 +100,6 @@ public class MovieDetailFragment extends Fragment {
     private ArrayList<Review> reviews;
 
     private boolean isFavorite;
-
-    private OnFavoriteChangedListener onFavoriteChangedListener;
 
     @AfterViews
     void init()
@@ -137,14 +134,12 @@ public class MovieDetailFragment extends Fragment {
     void saveMovie()
     {
         app.saveMovie(movie, trailers, reviews);
-        onFavoriteChangedListener.onFavoriteChanged();
     }
 
     @Background
     void removeMovie()
     {
         app.removeMovie(movie);
-        onFavoriteChangedListener.onFavoriteChanged();
     }
 
     @UiThread
@@ -246,7 +241,7 @@ public class MovieDetailFragment extends Fragment {
             ConnectionEventsListener connectionEventsListener = new ConnectionEventsListener() {
                 @Override
                 public void onSuccess(JSONObject response) {
-                    reviews = ContentSolver.parseReviews(response, movie);
+                    reviews = ContentSolver.parseReviews(response);
                     refreshReviews();
                 }
 
@@ -308,8 +303,4 @@ public class MovieDetailFragment extends Fragment {
         }
     }
 
-    public void setOnFavoriteChangedListener(OnFavoriteChangedListener onFavoriteChangedListener)
-    {
-        this.onFavoriteChangedListener = onFavoriteChangedListener;
-    }
 }

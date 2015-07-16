@@ -36,13 +36,14 @@ public class ContentSolver {
             JSONArray resultsArray = response.getJSONArray(RESULTS);
             JSONObject jsonMovie;
             Movie movie;
-            String id, name, imageFileName, backdropFileName;
+            int id;
+            String name, imageFileName, backdropFileName;
             double average;
 
             for(int i = 0; i < resultsArray.length(); i++)
             {
                 jsonMovie = resultsArray.getJSONObject(i);
-                id = jsonMovie.getString(ID);
+                id = jsonMovie.getInt(ID);
                 name = jsonMovie.getString(NAME);
                 average = jsonMovie.getDouble(AVERAGE);
                 imageFileName = jsonMovie.getString(IMAGE_NAME);
@@ -61,11 +62,11 @@ public class ContentSolver {
     public static Movie parseMovie(JSONObject response)
     {
         Movie movie = null;
-        String id, name, imageFileName, backdropFileName, synopsis, yearString;
-        int year, duration;
+        String name, imageFileName, backdropFileName, synopsis, yearString;
+        int id, year, duration;
         double average;
         try {
-            id = response.getString(ID);
+            id = response.getInt(ID);
             name = response.getString(NAME);
             average = response.getDouble(AVERAGE);
             imageFileName = response.getString(IMAGE_NAME);
@@ -98,7 +99,7 @@ public class ContentSolver {
             {
                 jsonTrailer = trailersArray.getJSONObject(i);
                 videoId = jsonTrailer.getString(VIDEO_ID);
-                trailer = new Trailer(videoId, movie);
+                trailer = new Trailer(videoId);
                 trailers.add(trailer);
             }
         } catch (JSONException e) {
@@ -107,7 +108,7 @@ public class ContentSolver {
         return trailers;
     }
 
-    public static ArrayList<Review> parseReviews(JSONObject response, Movie movie) {
+    public static ArrayList<Review> parseReviews(JSONObject response) {
         ArrayList<Review> reviews = new ArrayList<>();
         try {
             JSONArray jsonReviews = response.getJSONArray(RESULTS);
@@ -120,7 +121,7 @@ public class ContentSolver {
                 jsonReview = jsonReviews.getJSONObject(i);
                 author = jsonReview.getString(AUTHOR);
                 content = jsonReview.getString(CONTENT);
-                review = new Review(author, content, movie);
+                review = new Review(author, content);
                 reviews.add(review);
             }
         } catch (JSONException e) {

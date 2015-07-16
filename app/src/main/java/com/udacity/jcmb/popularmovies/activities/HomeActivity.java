@@ -13,7 +13,6 @@ import com.udacity.jcmb.popularmovies.R;
 import com.udacity.jcmb.popularmovies.fragments.MovieDetailFragment;
 import com.udacity.jcmb.popularmovies.fragments.MovieDetailFragment_;
 import com.udacity.jcmb.popularmovies.fragments.MoviesFragment;
-import com.udacity.jcmb.popularmovies.interfaces.OnFavoriteChangedListener;
 import com.udacity.jcmb.popularmovies.interfaces.OnMovieChosenListener;
 import com.udacity.jcmb.popularmovies.model.Movie;
 import com.udacity.jcmb.popularmovies.prefs.MyPrefs_;
@@ -26,8 +25,8 @@ import org.androidannotations.annotations.sharedpreferences.Pref;
 
 @EActivity(R.layout.activity_home)
 @OptionsMenu(R.menu.menu_home)
-public class HomeActivity extends AppCompatActivity implements OnMovieChosenListener,
-        OnFavoriteChangedListener {
+public class HomeActivity extends AppCompatActivity implements OnMovieChosenListener
+{
 
     @Pref
     MyPrefs_ prefs;
@@ -62,15 +61,6 @@ public class HomeActivity extends AppCompatActivity implements OnMovieChosenList
                     .name(movie.getName())
                     .color(color)
                     .start();
-        }
-    }
-
-    @Override
-    public void onFavoriteChanged() {
-        if(prefs.fromFavorites().get())
-        {
-            Log.d(this.getClass().getSimpleName(), "Favorites Refreshed");
-            fragmentMovies.getFavoriteMovies();
         }
     }
 
@@ -122,7 +112,6 @@ public class HomeActivity extends AppCompatActivity implements OnMovieChosenList
                 .backdropFileName(movie.getBackdropFileName())
                 .imageFileName(movie.getImageFileName())
                 .build();
-        movieDetailFragment.setOnFavoriteChangedListener(this);
         transaction.replace(R.id.movieDetail, movieDetailFragment);
         transaction.addToBackStack(null);
         transaction.commit();

@@ -95,7 +95,7 @@ public class MovieDetailActivity extends AppCompatActivity
     AppCompatCheckBox chkFavorite;
 
     @Extra
-    String id;
+    int id;
 
     @Extra
     String name;
@@ -307,7 +307,7 @@ public class MovieDetailActivity extends AppCompatActivity
             ConnectionEventsListener connectionEventsListener = new ConnectionEventsListener() {
                 @Override
                 public void onSuccess(JSONObject response) {
-                    reviews = ContentSolver.parseReviews(response, movie);
+                    reviews = ContentSolver.parseReviews(response);
                     refreshReviews();
                 }
 

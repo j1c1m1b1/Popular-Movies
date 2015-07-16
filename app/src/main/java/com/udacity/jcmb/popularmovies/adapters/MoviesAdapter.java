@@ -2,7 +2,9 @@ package com.udacity.jcmb.popularmovies.adapters;
 
 
 import android.content.Context;
+import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -25,14 +27,10 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
     @RootContext
     Context context;
 
-    private ArrayList<Movie> movies;
+    private Cursor cursor;
 
     private OnMovieChosenListener onMovieChosenListener;
-
-    public void setMovies(ArrayList<Movie> movies) {
-        this.movies = movies;
-        notifyDataSetChanged();
-    }
+    private ArrayList<Movie> movies;
 
     public void setOnMovieChosenListener(OnMovieChosenListener onMovieChosenListener) {
         this.onMovieChosenListener = onMovieChosenListener;
@@ -46,13 +44,73 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
-        Movie movie = movies.get(position);
-        viewHolder.bind(movie, onMovieChosenListener);
+        Movie movie;
+        if(cursor != null)
+        {
+            movie = getMovieFromCursorAt(position);
+        }
+        else
+        {
+            movie = movies.get(position);
+            Log.i("Adapter", String.valueOf(movie == null));
+        }
+        if(movie != null)
+        {
+            viewHolder.bind(movie, onMovieChosenListener);
+        }
     }
 
     @Override
     public int getItemCount() {
-        return movies == null ? 0 : movies.size();
+        if(cursor != null)
+        {
+            return cursor.getCount();
+        }
+        else if(movies != null)
+        {
+            return movies.size();
+        }
+        else
+        {
+            return  0;
+        }
+    }
+
+    private Movie getMovieFromCursorAt(int position)
+    {
+        Movie movie = null;
+        if(cursor.moveToPosition(position))
+        {
+            int id, year, duration;
+            double average;
+            String name, imageFileName, backdropFileName, synopsis;
+
+            id = cursor.getInt(0);
+            name = cursor.getString(1);
+            imageFileName = cursor.getString(2);
+            backdropFileName = cursor.getString(3);
+            average = cursor.getDouble(4);
+            synopsis = cursor.getString(5);
+            year = cursor.getInt(6);
+            duration = cursor.getInt(7);
+
+            movie = new Movie(id,name,imageFileName, backdropFileName, average);
+            movie.setSynopsis(synopsis);
+            movie.setYear(year);
+            movie.setDuration(duration);
+        }
+        return movie;
+    }
+
+    public void setMovies(ArrayList<Movie> movies) {
+        this.movies = movies;
+        notifyDataSetChanged();
+    }
+
+    public void setCursor(Cursor cursor)
+    {
+        this.cursor = cursor;
+        notifyDataSetChanged();
     }
 
 

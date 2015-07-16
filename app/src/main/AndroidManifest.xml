@@ -23,6 +23,11 @@
         <activity android:name=".activities.MovieDetailActivity_"
             android:theme="@style/AppTheme.Base.NoActionBar"/>
 
+        <provider
+            android:name=".providers.MoviesProvider_"
+            android:authorities="com.udacity.jcmb.popularmovies"
+            android:exported="false"/>
+
     </application>
 
 </manifest>

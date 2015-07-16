@@ -23,7 +23,7 @@ public class Requests {
     private static final String API_KEY = "e651fa3187fcab2855a983e887bb50e1";
     private static final String BASE_URL = "http://api.themoviedb.org/3/";
     private static final String DISCOVER_MOVIE = "discover/movie?sort_by=";
-    private static final String GET_MOVIE = "movie/%s";
+    private static final String GET_MOVIE = "movie/%d";
     private static final String TRAILERS = "/videos";
     private static final String REVIEWS = "/reviews";
     private static final String POPULARITY = "popularity.desc";
@@ -53,13 +53,13 @@ public class Requests {
 
     }
 
-    public static void getMovie(String movieId, ConnectionEventsListener connectionEventsListener)
+    public static void getMovie(int movieId, ConnectionEventsListener connectionEventsListener)
     {
         String url = String.format(GET_MOVIE_PATTERN, movieId);
         callApi(url, connectionEventsListener);
     }
 
-    public static void getMovieTrailers(String movieId,
+    public static void getMovieTrailers(int movieId,
                                         ConnectionEventsListener connectionEventsListener)
     {
         String url = String.format(GET_TRAILERS_PATTERN, movieId);
@@ -67,7 +67,7 @@ public class Requests {
         callApi(url, connectionEventsListener);
     }
 
-    public static void getMovieReviews(String movieId,
+    public static void getMovieReviews(int movieId,
                                        ConnectionEventsListener connectionEventsListener)
     {
         String url = String.format(GET_REVIEWS_PATTERN, movieId);

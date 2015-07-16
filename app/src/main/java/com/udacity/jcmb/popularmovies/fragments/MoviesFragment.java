@@ -1,13 +1,19 @@
 package com.udacity.jcmb.popularmovies.fragments;
 
 import android.app.Activity;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.udacity.jcmb.popularmovies.R;
@@ -15,6 +21,7 @@ import com.udacity.jcmb.popularmovies.adapters.MoviesAdapter;
 import com.udacity.jcmb.popularmovies.application.PopularMovies;
 import com.udacity.jcmb.popularmovies.connection.ContentSolver;
 import com.udacity.jcmb.popularmovies.connection.Requests;
+import com.udacity.jcmb.popularmovies.db.contracts.PopularMoviesContract;
 import com.udacity.jcmb.popularmovies.interfaces.ConnectionEventsListener;
 import com.udacity.jcmb.popularmovies.interfaces.OnMovieChosenListener;
 import com.udacity.jcmb.popularmovies.model.Movie;
@@ -37,9 +44,11 @@ import java.util.ArrayList;
  * @author Julio Mendoza on 7/9/15.
  */
 @EFragment(R.layout.fragment_movies)
-public class MoviesFragment extends Fragment {
+public class MoviesFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String MOVIES = "movies";
+
+    private static final int MOVIES_LOADER = 0;
 
     @App
     PopularMovies app;
@@ -54,6 +63,8 @@ public class MoviesFragment extends Fragment {
     RecyclerView rvMovies;
 
     private ArrayList<Movie> movies;
+
+    private Cursor cursor;
 
     private OnMovieChosenListener onMovieChosenListener;
 
@@ -104,9 +115,11 @@ public class MoviesFragment extends Fragment {
     @Background
     void getMovies(boolean popularity)
     {
+        getLoaderManager().destroyLoader(MOVIES_LOADER);
         ConnectionEventsListener connectionEventsListener = new ConnectionEventsListener() {
             @Override
             public void onSuccess(JSONObject response) {
+                cursor = null;
                 movies = ContentSolver.parseMoviesFromResponse(response);
                 refreshAdapter();
             }
@@ -126,17 +139,16 @@ public class MoviesFragment extends Fragment {
         }
     }
 
-    @Background
     public void getFavoriteMovies()
     {
-        movies = app.getAllMovies();
-        refreshAdapter();
+        getLoaderManager().initLoader(MOVIES_LOADER, null, this);
     }
 
     @UiThread
     void refreshAdapter()
     {
         adapter.setMovies(movies);
+        adapter.setCursor(cursor);
     }
 
     @OptionsItem({R.id.action_popularity, R.id.action_ranking, R.id.action_favorites})
@@ -203,4 +215,29 @@ public class MoviesFragment extends Fragment {
         super.onAttach(activity);
         onMovieChosenListener = (OnMovieChosenListener)getActivity();
     }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Uri moviesUri = PopularMoviesContract.MoviesEntry.CONTENT_URI;
+
+        return new CursorLoader(getActivity(), moviesUri, null, null, null, null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        Log.i("Loader", "Loader task finished");
+        cursor = data;
+        if(movies != null)
+        {
+            movies.clear();
+        }
+        refreshAdapter();
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        cursor = null;
+    }
+
+
 }

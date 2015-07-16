@@ -1,18 +1,16 @@
 package com.udacity.jcmb.popularmovies.model;
 
+import android.content.ContentValues;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
+import com.udacity.jcmb.popularmovies.db.contracts.PopularMoviesContract;
 
 /**
  * @author Julio Mendoza on 7/9/15.
  */
-@DatabaseTable(tableName = "reviews")
 public class Review implements Parcelable{
 
-    public static final String MOVIE_ID = "movie_id";
     public static final Creator<Review> CREATOR = new Creator<Review>() {
         @Override
         public Review createFromParcel(Parcel in) {
@@ -24,14 +22,11 @@ public class Review implements Parcelable{
             return new Review[size];
         }
     };
-    @DatabaseField(generatedId = true)
     private int id;
-    @DatabaseField
+
     private String author;
-    @DatabaseField
+
     private String content;
-    @DatabaseField(foreign = true, foreignAutoRefresh = true, columnName = MOVIE_ID)
-    private Movie movie;
 
     /**
      * Required by ORMLite
@@ -39,17 +34,15 @@ public class Review implements Parcelable{
     public Review() {
     }
 
-    public Review(String author, String content, Movie movie) {
+    public Review(String author, String content) {
         this.author = author;
         this.content = content;
-        this.movie = movie;
     }
 
     protected Review(Parcel in) {
         id = in.readInt();
         author = in.readString();
         content = in.readString();
-        movie = in.readParcelable(Movie.class.getClassLoader());
     }
 
     public String getAuthor() {
@@ -70,6 +63,13 @@ public class Review implements Parcelable{
         dest.writeInt(id);
         dest.writeString(author);
         dest.writeString(content);
-        dest.writeParcelable(movie, flags);
+    }
+
+    public ContentValues toValues(int movieId) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(PopularMoviesContract.ReviewsEntry.COLUMN_MOV_KEY, movieId);
+        contentValues.put(PopularMoviesContract.ReviewsEntry.COLUMN_AUTHOR, author);
+        contentValues.put(PopularMoviesContract.ReviewsEntry.COLUMN_CONTENT, content);
+        return contentValues;
     }
 }
