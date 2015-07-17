@@ -1,13 +1,14 @@
 package com.udacity.jcmb.popularmovies.activities;
 
 import android.graphics.drawable.ColorDrawable;
-import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import com.udacity.jcmb.popularmovies.R;
 import com.udacity.jcmb.popularmovies.fragments.MovieDetailFragment;
@@ -16,11 +17,13 @@ import com.udacity.jcmb.popularmovies.fragments.MoviesFragment;
 import com.udacity.jcmb.popularmovies.interfaces.OnMovieChosenListener;
 import com.udacity.jcmb.popularmovies.model.Movie;
 import com.udacity.jcmb.popularmovies.prefs.MyPrefs_;
+import com.udacity.jcmb.popularmovies.utils.AnimationUtils;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.FragmentById;
 import org.androidannotations.annotations.OptionsMenu;
+import org.androidannotations.annotations.ViewById;
 import org.androidannotations.annotations.sharedpreferences.Pref;
 
 @EActivity(R.layout.activity_home)
@@ -30,6 +33,12 @@ public class HomeActivity extends AppCompatActivity implements OnMovieChosenList
 
     @Pref
     MyPrefs_ prefs;
+
+    @ViewById
+    LinearLayout rootLayout;
+
+    @ViewById
+    FrameLayout movieDetail;
 
     @FragmentById
     MoviesFragment fragmentMovies;
@@ -85,19 +94,6 @@ public class HomeActivity extends AppCompatActivity implements OnMovieChosenList
         }
     }
 
-    private void removeMovieFragment()
-    {
-        if(movieDetailFragment != null)
-        {
-            FragmentManager manager = getSupportFragmentManager();
-            FragmentTransaction transaction = manager.beginTransaction();
-            transaction.remove(movieDetailFragment);
-            transaction.commit();
-
-            movieDetailFragment = null;
-        }
-    }
-
     private void placeMovieDetailFragment(Movie movie, int color)
     {
         if(getSupportActionBar() != null)
@@ -105,6 +101,16 @@ public class HomeActivity extends AppCompatActivity implements OnMovieChosenList
             getSupportActionBar().setBackgroundDrawable(new ColorDrawable(color));
         }
         FragmentManager manager = getSupportFragmentManager();
+
+        manager.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+            @Override
+            public void onBackStackChanged() {
+                if(movieDetailFragment.isDetached())
+                {
+                    refreshActionBar();
+                }
+            }
+        });
         FragmentTransaction transaction = manager.beginTransaction();
         movieDetailFragment = MovieDetailFragment_.builder()
                 .average(movie.getAverage())
@@ -117,22 +123,12 @@ public class HomeActivity extends AppCompatActivity implements OnMovieChosenList
         transaction.commit();
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        removeMovieFragment();
-        super.onSaveInstanceState(outState);
+    public void createSnackBar(int resId) {
+        Snackbar.make(rootLayout, resId, Snackbar.LENGTH_LONG).show();
     }
 
-    @Override
-    public void onBackPressed() {
-        if(movieDetailFragment != null && movieDetailFragment.isAdded())
-        {
-            refreshActionBar();
-            removeMovieFragment();
-        }
-        else
-        {
-            super.onBackPressed();
-        }
+    public void createCircularReveal(int x, int y)
+    {
+        AnimationUtils.createCircularReveal(movieDetail, x, y, this);
     }
 }

@@ -238,6 +238,4 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     public void onLoaderReset(Loader<Cursor> loader) {
         cursor = null;
     }
-
-
 }
