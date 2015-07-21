@@ -72,7 +72,9 @@ public class MoviesProvider extends ContentProvider {
     private Cursor getMovieById(Uri uri)
 
     {
-        String movieId = uri.getPath();
+        String path = uri.getPath();
+
+        String movieId = path.substring(path.lastIndexOf('/') + 1);
 
         String selection = PopularMoviesContract.MoviesEntry._ID + " = ?";
 

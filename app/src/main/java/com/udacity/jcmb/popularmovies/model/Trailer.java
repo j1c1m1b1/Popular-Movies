@@ -9,7 +9,10 @@ import com.udacity.jcmb.popularmovies.db.contracts.PopularMoviesContract;
 /**
  * @author Julio Mendoza on 7/15/15.
  */
-public class Trailer implements Parcelable{
+public class Trailer implements Parcelable
+{
+
+    public static final String YOUTUBE_URI = "http://youtube.com/watch?v=";
 
     public static final Creator<Trailer> CREATOR = new Creator<Trailer>() {
         @Override

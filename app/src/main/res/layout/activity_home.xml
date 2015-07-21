@@ -3,11 +3,10 @@
     android:layout_height="match_parent"
     tools:context=".HomeActivity">
 
-    <fragment
-        android:id="@+id/fragmentMovies"
-        class="com.udacity.jcmb.popularmovies.fragments.MoviesFragment_"
+    <FrameLayout
+        android:id="@+id/layoutMovies"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:layout="@layout/fragment_movies" />
+        android:layout_height="match_parent">
+    </FrameLayout>
 
 </FrameLayout>

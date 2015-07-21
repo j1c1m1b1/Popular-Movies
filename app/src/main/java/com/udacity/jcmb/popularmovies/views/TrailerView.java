@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.udacity.jcmb.popularmovies.R;
+import com.udacity.jcmb.popularmovies.model.Trailer;
 import com.udacity.jcmb.popularmovies.utils.Utils;
 
 import org.androidannotations.annotations.EViewGroup;
@@ -20,10 +21,6 @@ import org.androidannotations.annotations.ViewById;
  */
 @EViewGroup(R.layout.view_trailer)
 public class TrailerView extends LinearLayout {
-
-//    private static final String YOUTUBE_URI = "vnd.youtube://";
-
-    private static final String YOUTUBE_URI = "http://youtube.com/watch?v=";
 
     @ViewById
     TextView tvTitle;
@@ -55,7 +52,8 @@ public class TrailerView extends LinearLayout {
 
     public void bind(String videoId, String title)
     {
-        final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(YOUTUBE_URI + videoId));
+        final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Trailer.YOUTUBE_URI
+                + videoId));
 
         tvTitle.setText(title);
 

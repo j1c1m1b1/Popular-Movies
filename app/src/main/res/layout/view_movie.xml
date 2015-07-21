@@ -10,4 +10,11 @@
         android:contentDescription="@string/app_name"
         />
 
+    <View
+        android:id="@+id/selectedView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/alpha_orange"
+        android:visibility="gone"/>
+
 </merge>

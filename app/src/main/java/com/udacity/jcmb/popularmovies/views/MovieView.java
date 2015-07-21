@@ -5,8 +5,8 @@ import android.graphics.Bitmap;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.AbsListView;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import com.bumptech.glide.Glide;
 import com.udacity.jcmb.popularmovies.R;
@@ -25,12 +25,16 @@ import java.util.concurrent.ExecutionException;
  * @author Julio Mendoza on 7/9/15.
  */
 @EViewGroup(R.layout.view_movie)
-public class MovieView extends LinearLayout{
+public class MovieView extends FrameLayout{
 
     @ViewById
     ImageView ivMovie;
 
+    @ViewById
+    View selectedView;
+
     private Context context;
+
     private int color;
 
     public MovieView(Context context) {
@@ -57,7 +61,8 @@ public class MovieView extends LinearLayout{
         setLayoutParams(params);
     }
 
-    public void bind(final Movie movie, final OnMovieChosenListener onMovieChosenListener)
+    public void bind(final Movie movie, final OnMovieChosenListener onMovieChosenListener,
+                     final boolean selected, final int position, boolean singleChoice)
     {
         Glide.with(context).load(Requests.IMAGES_URL + movie.getImageFileName())
                 .centerCrop().into(ivMovie);
@@ -69,13 +74,27 @@ public class MovieView extends LinearLayout{
 
         final int y = location[1] + getHeight()/2;
 
+        if(singleChoice)
+        {
+            if(selected)
+            {
+                selectedView.setVisibility(VISIBLE);
+            }
+            else if(selectedView.getVisibility() == VISIBLE)
+            {
+                selectedView.setVisibility(GONE);
+            }
+        }
+
         setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                onMovieChosenListener.onMovieChosen(movie, x, y, color);
+                if(!selected)
+                {
+                    onMovieChosenListener.onMovieChosen(movie, x, y, color, position);
+                }
             }
         });
-
     }
 
     @Background

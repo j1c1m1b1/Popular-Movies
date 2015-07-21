@@ -30,10 +30,16 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
     private Cursor cursor;
 
     private OnMovieChosenListener onMovieChosenListener;
+
     private ArrayList<Movie> movies;
 
-    public void setOnMovieChosenListener(OnMovieChosenListener onMovieChosenListener) {
+    private boolean singleChoice;
+
+    private int selectedIndex = -1;
+
+    public void initialize(OnMovieChosenListener onMovieChosenListener, boolean singleChoice) {
         this.onMovieChosenListener = onMovieChosenListener;
+        this.singleChoice = singleChoice;
     }
 
     @Override
@@ -54,9 +60,12 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
             movie = movies.get(position);
             Log.i("Adapter", String.valueOf(movie == null));
         }
+
+        boolean selected = selectedIndex == position;
+
         if(movie != null)
         {
-            viewHolder.bind(movie, onMovieChosenListener);
+            viewHolder.bind(movie, onMovieChosenListener, selected, position);
         }
     }
 
@@ -113,6 +122,12 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
         notifyDataSetChanged();
     }
 
+    public void setSelection(int position)
+    {
+        this.selectedIndex = position;
+        notifyDataSetChanged();
+    }
+
 
     class ViewHolder extends RecyclerView.ViewHolder
     {
@@ -123,9 +138,10 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
             view = (MovieView)itemView;
         }
 
-        public void bind(Movie movie, OnMovieChosenListener onMovieChosenListener)
+        public void bind(Movie movie, OnMovieChosenListener onMovieChosenListener,
+                         boolean selected, int position)
         {
-            view.bind(movie, onMovieChosenListener);
+            view.bind(movie, onMovieChosenListener, selected, position, singleChoice);
         }
     }
 

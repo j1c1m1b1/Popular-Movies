@@ -7,5 +7,5 @@ import com.udacity.jcmb.popularmovies.model.Movie;
  */
 public interface OnMovieChosenListener {
 
-    void onMovieChosen(Movie movie, int x, int y, int color);
+    void onMovieChosen(Movie movie, int x, int y, int color, int position);
 }

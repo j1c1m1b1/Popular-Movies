@@ -1,6 +1,5 @@
 package com.udacity.jcmb.popularmovies.fragments;
 
-import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,6 +16,7 @@ import android.util.Log;
 import android.view.MenuItem;
 
 import com.udacity.jcmb.popularmovies.R;
+import com.udacity.jcmb.popularmovies.activities.HomeActivity;
 import com.udacity.jcmb.popularmovies.adapters.MoviesAdapter;
 import com.udacity.jcmb.popularmovies.application.PopularMovies;
 import com.udacity.jcmb.popularmovies.connection.ContentSolver;
@@ -32,6 +32,7 @@ import org.androidannotations.annotations.App;
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EFragment;
+import org.androidannotations.annotations.FragmentArg;
 import org.androidannotations.annotations.OptionsItem;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
@@ -44,9 +45,11 @@ import java.util.ArrayList;
  * @author Julio Mendoza on 7/9/15.
  */
 @EFragment(R.layout.fragment_movies)
-public class MoviesFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class MoviesFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, OnMovieChosenListener {
 
     private static final String MOVIES = "movies";
+
+    private static final String POSITION = "position";
 
     private static final int MOVIES_LOADER = 0;
 
@@ -62,11 +65,11 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     @ViewById
     RecyclerView rvMovies;
 
+    @FragmentArg
+    boolean singleChoice;
+    int position = -1;
     private ArrayList<Movie> movies;
-
     private Cursor cursor;
-
-    private OnMovieChosenListener onMovieChosenListener;
 
     @AfterViews
     void init()
@@ -76,7 +79,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         rvMovies.setLayoutManager(manager);
         rvMovies.setHasFixedSize(false);
         rvMovies.setItemAnimator(new DefaultItemAnimator());
-        adapter.setOnMovieChosenListener(onMovieChosenListener);
+        adapter.initialize(this, singleChoice);
         rvMovies.setAdapter(adapter);
     }
 
@@ -198,6 +201,10 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         {
             outState.putParcelableArrayList(MOVIES, movies);
         }
+        if(position != -1)
+        {
+            outState.putInt(POSITION, position);
+        }
         super.onSaveInstanceState(outState);
     }
 
@@ -206,14 +213,9 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         super.onCreate(savedInstanceState);
         if(savedInstanceState != null && savedInstanceState.containsKey(MOVIES))
         {
+            position = savedInstanceState.getInt(POSITION);
             movies = savedInstanceState.getParcelableArrayList(MOVIES);
         }
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        onMovieChosenListener = (OnMovieChosenListener)getActivity();
     }
 
     @Override
@@ -237,5 +239,17 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         cursor = null;
+    }
+
+    @Override
+    public void onMovieChosen(Movie movie, int x, int y, int color, int position)
+    {
+        HomeActivity activity = (HomeActivity) getActivity();
+        if(singleChoice)
+        {
+            this.position = position;
+            adapter.setSelection(position);
+        }
+        activity.onMovieChosen(movie, x, y, color);
     }
 }

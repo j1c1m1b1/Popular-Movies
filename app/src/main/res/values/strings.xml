@@ -7,4 +7,11 @@
     <string name="favorites">Favorites</string>
     <string name="movie_is_favorite">This movie is now favorite</string>
     <string name="removed_favorite">Movie removed from favorites</string>
+    <string name="share">Share…</string>
+    <string name="share_trailer">Share movie trailer…</string>
+    <string name="no_trailers">This movie has no trailers to share</string>
+
+    <!--Sync adapter related-->
+    <string name="authority">com.udacity.jcmb.popularmovies</string>
+    <string name="sync_account_type">sunshine.example.com</string>
 </resources>

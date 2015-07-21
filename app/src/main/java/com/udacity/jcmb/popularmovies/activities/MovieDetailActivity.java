@@ -1,5 +1,6 @@
 package com.udacity.jcmb.popularmovies.activities;
 
+import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -16,12 +17,14 @@ import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.App;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.Extra;
+import org.androidannotations.annotations.OptionsMenu;
 import org.androidannotations.annotations.ViewById;
 
 /**
  * @author Julio Mendoza on 7/9/15.
  */
 @EActivity(R.layout.activity_movie_detail)
+@OptionsMenu(R.menu.menu_detail)
 public class MovieDetailActivity extends AppCompatActivity
 {
     @App
@@ -54,22 +57,36 @@ public class MovieDetailActivity extends AppCompatActivity
     @Extra
     int color;
 
+    boolean noInstance;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        noInstance = savedInstanceState == null;
+    }
 
     @AfterViews
     void init()
     {
-        MovieDetailFragment fragment = MovieDetailFragment_.builder()
-                .id(id)
-                .imageFileName(imageFileName)
-                .backdropFileName(backdropFileName)
-                .average(average).build();
+        if(noInstance)
+        {
+            MovieDetailFragment fragment = MovieDetailFragment_.builder()
+                    .id(id)
+                    .imageFileName(imageFileName)
+                    .backdropFileName(backdropFileName)
+                    .average(average)
+                    .color(color)
+                    .build();
 
-        FragmentManager manager = getSupportFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
+            fragment.setHasOptionsMenu(true);
 
-        transaction.add(R.id.movieDetail, fragment);
+            FragmentManager manager = getSupportFragmentManager();
+            FragmentTransaction transaction = manager.beginTransaction();
 
-        transaction.commit();
+            transaction.add(R.id.movieDetail, fragment);
+
+            transaction.commit();
+        }
     }
 
     public void createSnackBar(int stringId)

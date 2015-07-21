@@ -1,19 +1,19 @@
 package com.udacity.jcmb.popularmovies.fragments;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatCheckBox;
-import android.support.v7.widget.Toolbar;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -28,6 +28,7 @@ import com.udacity.jcmb.popularmovies.model.Movie;
 import com.udacity.jcmb.popularmovies.model.Review;
 import com.udacity.jcmb.popularmovies.model.Trailer;
 import com.udacity.jcmb.popularmovies.utils.BlurUtils;
+import com.udacity.jcmb.popularmovies.utils.Utils;
 import com.udacity.jcmb.popularmovies.views.ReviewView;
 import com.udacity.jcmb.popularmovies.views.ReviewView_;
 import com.udacity.jcmb.popularmovies.views.TrailerView;
@@ -38,6 +39,7 @@ import org.androidannotations.annotations.App;
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.EFragment;
 import org.androidannotations.annotations.FragmentArg;
+import org.androidannotations.annotations.OptionsItem;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 import org.json.JSONObject;
@@ -61,19 +63,13 @@ public class MovieDetailFragment extends Fragment {
     PopularMovies app;
 
     @ViewById
-    CoordinatorLayout coordinator;
+    ScrollView coordinator;
 
     @ViewById
     ImageView ivMovieBackground;
 
     @ViewById
     CircleImageView ivMovie;
-
-    @ViewById
-    CollapsingToolbarLayout collapsingToolbarLayout;
-
-    @ViewById
-    Toolbar toolbar;
 
     @ViewById
     TextView tvYear;
@@ -154,19 +150,22 @@ public class MovieDetailFragment extends Fragment {
     @AfterViews
     void init()
     {
-        trailers = new ArrayList<>();
-        reviews = new ArrayList<>();
-        getMovie();
-//        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
-        toolbar.setTitle(name);
-        collapsingToolbarLayout.setContentScrimColor(color);
+        initMovie();
+        ActionBar toolbar = ((AppCompatActivity)getActivity()).getSupportActionBar();
+        if(toolbar != null)
+        {
+            toolbar.setTitle(name);
+            toolbar.setBackgroundDrawable(new ColorDrawable(color));
+        }
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        {
+            int darkerColor = Utils.getDarkerColor(color);
+            getActivity().getWindow().setStatusBarColor(darkerColor);
+        }
+
         Glide.with(this).load(Requests.IMAGES_URL + imageFileName).centerCrop().into(ivMovie);
         ivMovieBackground.setAlpha(0.8f);
         blurImage();
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-        {
-            getActivity().getWindow().setStatusBarColor(getResources().getColor(R.color.transparent));
-        }
 
         checkedChangeListener = new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -259,9 +258,22 @@ public class MovieDetailFragment extends Fragment {
     }
 
     @Background
-    void getMovie()
+    void initMovie()
     {
         isFavorite = app.isFavorite(id);
+        if(movie == null)
+        {
+            loadMovie();
+        }
+        else
+        {
+            refreshMovieInfo();
+        }
+    }
+
+    @Background
+    void loadMovie()
+    {
         if(isFavorite)
         {
             movie = app.getMovie(id);
@@ -286,10 +298,30 @@ public class MovieDetailFragment extends Fragment {
         }
     }
 
+    @UiThread
+    void refreshMovieInfo()
+    {
+        ActionBar actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
+        if(actionBar != null)
+        {
+            actionBar.setTitle(movie.getName());
+        }
+        tvYear.setText("" + movie.getYear());
+        tvDuration.setText("" + movie.getDuration());
+        tvSynopsis.setText(movie.getSynopsis());
+        refreshCheckView(isFavorite);
+        getTrailers();
+        getReviews();
+    }
+
     @Background
     void getTrailers()
     {
-        if(isFavorite)
+        if(trailers != null)
+        {
+            refreshTrailers();
+        }
+        else if(isFavorite)
         {
             trailers = app.getTrailersOfMovie(movie);
             refreshTrailers();
@@ -316,13 +348,18 @@ public class MovieDetailFragment extends Fragment {
     @Background
     void getReviews()
     {
-        if(isFavorite)
+        if(reviews != null)
+        {
+            refreshReviews();
+        }
+        else if(isFavorite)
         {
             reviews = app.getReviewsOfMovie(movie);
             refreshReviews();
         }
         else
         {
+            reviews = new ArrayList<>();
             ConnectionEventsListener connectionEventsListener = new ConnectionEventsListener() {
                 @Override
                 public void onSuccess(JSONObject response) {
@@ -337,22 +374,6 @@ public class MovieDetailFragment extends Fragment {
             };
             Requests.getMovieReviews(id, connectionEventsListener);
         }
-    }
-
-    @UiThread
-    void refreshMovieInfo()
-    {
-        ActionBar actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
-        if(actionBar != null)
-        {
-            actionBar.setTitle(movie.getName());
-        }
-        tvYear.setText("" + movie.getYear());
-        tvDuration.setText("" + movie.getDuration());
-        tvSynopsis.setText(movie.getSynopsis());
-        refreshCheckView(isFavorite);
-        getTrailers();
-        getReviews();
     }
 
     @UiThread
@@ -406,6 +427,25 @@ public class MovieDetailFragment extends Fragment {
         catch (ClassCastException e)
         {
             detailActivity = (MovieDetailActivity)getActivity();
+        }
+    }
+
+    @OptionsItem(R.id.action_share)
+    void share()
+    {
+        if(!trailers.isEmpty())
+        {
+            String trailerPath = Trailer.YOUTUBE_URI + trailers.get(0).getTrailerId();
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            sendIntent.putExtra(Intent.EXTRA_SUBJECT, movie.getName() + " Trailer");
+            sendIntent.putExtra(Intent.EXTRA_TEXT, trailerPath);
+            sendIntent.setType("text/plain");
+            startActivity(Intent.createChooser(sendIntent, getString(R.string.share_trailer)));
+        }
+        else
+        {
+            createSnackBar(R.string.no_trailers);
         }
     }
 }

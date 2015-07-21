@@ -132,4 +132,14 @@ public class Utils {
         view.getLocationOnScreen(location);
         return location;
     }
+
+    public static int getDarkerColor(int color)
+    {
+        int darkerColor;
+        float[] hsv = new float[3];
+        Color.colorToHSV(color, hsv);
+        hsv[2] *= 0.8f;
+        darkerColor = Color.HSVToColor(hsv);
+        return darkerColor;
+    }
 }
