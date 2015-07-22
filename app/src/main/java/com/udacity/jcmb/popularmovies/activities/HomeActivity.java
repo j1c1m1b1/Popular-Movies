@@ -19,6 +19,7 @@ import com.udacity.jcmb.popularmovies.fragments.MoviesFragment;
 import com.udacity.jcmb.popularmovies.fragments.MoviesFragment_;
 import com.udacity.jcmb.popularmovies.model.Movie;
 import com.udacity.jcmb.popularmovies.prefs.MyPrefs_;
+import com.udacity.jcmb.popularmovies.sync.PopularMoviesSyncAdapter;
 import com.udacity.jcmb.popularmovies.utils.AnimationUtils;
 import com.udacity.jcmb.popularmovies.utils.Utils;
 
@@ -62,6 +63,8 @@ public class HomeActivity extends AppCompatActivity
         transaction.commit();
 
         refreshActionBar();
+
+        PopularMoviesSyncAdapter.initializeSyncAdapter(this);
     }
 
     public void onMovieChosen(Movie movie, int x, int y, int color) {

@@ -15,17 +15,19 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MenuItem;
 
+import com.squareup.otto.Subscribe;
 import com.udacity.jcmb.popularmovies.R;
 import com.udacity.jcmb.popularmovies.activities.HomeActivity;
 import com.udacity.jcmb.popularmovies.adapters.MoviesAdapter;
 import com.udacity.jcmb.popularmovies.application.PopularMovies;
 import com.udacity.jcmb.popularmovies.connection.ContentSolver;
-import com.udacity.jcmb.popularmovies.connection.Requests;
 import com.udacity.jcmb.popularmovies.db.contracts.PopularMoviesContract;
-import com.udacity.jcmb.popularmovies.interfaces.ConnectionEventsListener;
 import com.udacity.jcmb.popularmovies.interfaces.OnMovieChosenListener;
 import com.udacity.jcmb.popularmovies.model.Movie;
 import com.udacity.jcmb.popularmovies.prefs.MyPrefs_;
+import com.udacity.jcmb.popularmovies.providers.BusProvider;
+import com.udacity.jcmb.popularmovies.providers.events.SyncFinishedEvent;
+import com.udacity.jcmb.popularmovies.sync.PopularMoviesSyncAdapter;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.App;
@@ -86,6 +88,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onStart() {
         super.onStart();
+        BusProvider.getInstance().register(this);
         if(movies == null)
         {
             if(prefs.fromFavorites().get())
@@ -119,6 +122,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     void getMovies(boolean popularity)
     {
         getLoaderManager().destroyLoader(MOVIES_LOADER);
+        /*
         ConnectionEventsListener connectionEventsListener = new ConnectionEventsListener() {
             @Override
             public void onSuccess(JSONObject response) {
@@ -132,13 +136,19 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
             }
         };
-        if(popularity)
+        */
+        PopularMoviesSyncAdapter.syncImmediately(getActivity(), popularity);
+    }
+
+    @Subscribe
+    public void receiveMovies(SyncFinishedEvent event)
+    {
+        if(event.isSuccessful())
         {
-            Requests.sortByPopularity(connectionEventsListener);
-        }
-        else
-        {
-            Requests.sortByRanking(connectionEventsListener);
+            JSONObject response = event.getResponse();
+            cursor = null;
+            movies = ContentSolver.parseMoviesFromResponse(response);
+            refreshAdapter();
         }
     }
 
@@ -216,6 +226,12 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
             position = savedInstanceState.getInt(POSITION);
             movies = savedInstanceState.getParcelableArrayList(MOVIES);
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        BusProvider.getInstance().unregister(this);
     }
 
     @Override
