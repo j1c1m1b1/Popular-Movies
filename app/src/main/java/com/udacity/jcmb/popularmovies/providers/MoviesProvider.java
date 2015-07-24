@@ -8,7 +8,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.udacity.jcmb.popularmovies.db.DatabaseHelper;
 import com.udacity.jcmb.popularmovies.db.contracts.PopularMoviesContract;
@@ -41,8 +40,6 @@ public class MoviesProvider extends ContentProvider {
     {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String authority = PopularMoviesContract.CONTENT_AUTHORITY;
-
-        Log.d("Provider", authority + PopularMoviesContract.MOVIES_PATH);
 
         //Movies URIs
         matcher.addURI(authority, PopularMoviesContract.MOVIES_PATH, MOVIES);

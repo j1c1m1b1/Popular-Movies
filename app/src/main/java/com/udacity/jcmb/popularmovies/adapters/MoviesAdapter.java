@@ -4,7 +4,6 @@ package com.udacity.jcmb.popularmovies.adapters;
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -58,7 +57,6 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
         else
         {
             movie = movies.get(position);
-            Log.i("Adapter", String.valueOf(movie == null));
         }
 
         boolean selected = selectedIndex == position;

@@ -1,7 +1,5 @@
 package com.udacity.jcmb.popularmovies.connection;
 
-import android.util.Log;
-
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -63,7 +61,6 @@ public class Requests {
                                         ConnectionEventsListener connectionEventsListener)
     {
         String url = String.format(GET_TRAILERS_PATTERN, movieId);
-        Log.d("url", url);
         callApi(url, connectionEventsListener);
     }
 
@@ -71,7 +68,6 @@ public class Requests {
                                        ConnectionEventsListener connectionEventsListener)
     {
         String url = String.format(GET_REVIEWS_PATTERN, movieId);
-        Log.d("url", url);
         callApi(url, connectionEventsListener);
     }
 
@@ -88,7 +84,6 @@ public class Requests {
             @Override
             public void onResponse(Response response) throws IOException {
                 String responseString = response.body().string();
-                Log.d("Response", "" + responseString);
                 JSONObject json;
                 try {
                     json = new JSONObject(responseString);
