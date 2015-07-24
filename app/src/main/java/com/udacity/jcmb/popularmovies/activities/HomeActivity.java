@@ -16,7 +16,6 @@ import com.udacity.jcmb.popularmovies.R;
 import com.udacity.jcmb.popularmovies.fragments.MovieDetailFragment;
 import com.udacity.jcmb.popularmovies.fragments.MovieDetailFragment_;
 import com.udacity.jcmb.popularmovies.fragments.MoviesFragment;
-import com.udacity.jcmb.popularmovies.fragments.MoviesFragment_;
 import com.udacity.jcmb.popularmovies.model.Movie;
 import com.udacity.jcmb.popularmovies.prefs.MyPrefs_;
 import com.udacity.jcmb.popularmovies.sync.PopularMoviesSyncAdapter;
@@ -24,6 +23,7 @@ import com.udacity.jcmb.popularmovies.utils.AnimationUtils;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.FragmentById;
 import org.androidannotations.annotations.OptionsMenu;
 import org.androidannotations.annotations.ViewById;
 import org.androidannotations.annotations.sharedpreferences.Pref;
@@ -42,6 +42,7 @@ public class HomeActivity extends AppCompatActivity
     @ViewById
     FrameLayout movieDetail;
 
+    @FragmentById
     MoviesFragment fragmentMovies;
 
     private MenuItem menuShare;
@@ -52,9 +53,9 @@ public class HomeActivity extends AppCompatActivity
     void init()
     {
         boolean singleChoice = movieDetail != null;
-
+        fragmentMovies.setSingleChoice(singleChoice);
+        fragmentMovies.setHasOptionsMenu(true);
         manager = getSupportFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
 
         manager.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
 
@@ -78,13 +79,7 @@ public class HomeActivity extends AppCompatActivity
             }
         });
 
-        fragmentMovies = MoviesFragment_.builder().singleChoice(singleChoice).build();
-        fragmentMovies.setHasOptionsMenu(true);
-        transaction.replace(R.id.layoutMovies, fragmentMovies, "movies");
-        transaction.commit();
-
         refreshActionBar();
-
         PopularMoviesSyncAdapter.initializeSyncAdapter(this);
     }
 

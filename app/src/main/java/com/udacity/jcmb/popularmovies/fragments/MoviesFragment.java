@@ -34,7 +34,6 @@ import org.androidannotations.annotations.App;
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EFragment;
-import org.androidannotations.annotations.FragmentArg;
 import org.androidannotations.annotations.OptionsItem;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
@@ -67,10 +66,12 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     @ViewById
     RecyclerView rvMovies;
 
-    @FragmentArg
-    boolean singleChoice;
-    int position = -1;
+    private boolean singleChoice;
+
+    private int position = -1;
+
     private ArrayList<Movie> movies;
+
     private Cursor cursor;
 
     @AfterViews
@@ -83,6 +84,10 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         rvMovies.setItemAnimator(new DefaultItemAnimator());
         adapter.initialize(this, singleChoice);
         rvMovies.setAdapter(adapter);
+    }
+
+    public void setSingleChoice(boolean singleChoice) {
+        this.singleChoice = singleChoice;
     }
 
     @Override
@@ -122,21 +127,6 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     void getMovies(boolean popularity)
     {
         getLoaderManager().destroyLoader(MOVIES_LOADER);
-        /*
-        ConnectionEventsListener connectionEventsListener = new ConnectionEventsListener() {
-            @Override
-            public void onSuccess(JSONObject response) {
-                cursor = null;
-                movies = ContentSolver.parseMoviesFromResponse(response);
-                refreshAdapter();
-            }
-
-            @Override
-            public void onFail() {
-
-            }
-        };
-        */
         PopularMoviesSyncAdapter.syncImmediately(getActivity(), popularity);
     }
 
@@ -207,6 +197,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
         if(movies != null && !movies.isEmpty())
         {
             outState.putParcelableArrayList(MOVIES, movies);
@@ -215,16 +206,21 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         {
             outState.putInt(POSITION, position);
         }
-        super.onSaveInstanceState(outState);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(savedInstanceState != null && savedInstanceState.containsKey(MOVIES))
+        if(savedInstanceState != null)
         {
-            position = savedInstanceState.getInt(POSITION);
-            movies = savedInstanceState.getParcelableArrayList(MOVIES);
+            if(savedInstanceState.containsKey(MOVIES))
+            {
+                movies = savedInstanceState.getParcelableArrayList(MOVIES);
+            }
+            if(savedInstanceState.containsKey(POSITION))
+            {
+                position = savedInstanceState.getInt(POSITION);
+            }
         }
     }
 

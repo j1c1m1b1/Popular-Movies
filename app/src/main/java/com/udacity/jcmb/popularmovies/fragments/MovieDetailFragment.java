@@ -9,11 +9,12 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.AppCompatCheckBox;
+import android.support.v7.widget.AppCompatRatingBar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.CompoundButton;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -93,7 +94,7 @@ public class MovieDetailFragment extends Fragment {
     LinearLayout layoutReviews;
 
     @ViewById
-    AppCompatCheckBox chkFavorite;
+    AppCompatRatingBar rbFavorite;
 
     HomeActivity homeActivity;
 
@@ -134,10 +135,6 @@ public class MovieDetailFragment extends Fragment {
 
     private boolean isFavorite;
 
-    private CompoundButton.OnCheckedChangeListener checkedChangeListener;
-
-    private MenuItem share;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -176,23 +173,25 @@ public class MovieDetailFragment extends Fragment {
         ivMovieBackground.setAlpha(0.8f);
         blurImage();
 
-        checkedChangeListener = new CompoundButton.OnCheckedChangeListener() {
+        rbFavorite.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked)
-                {
-                    chkFavorite.setText(R.string.is_favorite);
-                    createSnackBar(R.string.movie_is_favorite);
-                    saveMovie();
-                }
-                else
-                {
-                    chkFavorite.setText(R.string.save_favorite);
-                    createSnackBar(R.string.removed_favorite);
-                    removeMovie();
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    if (rbFavorite.getRating() == 1f) {
+                        rbFavorite.setRating(0f);
+                        createSnackBar(R.string.removed_favorite);
+                        removeMovie();
+                    } else {
+                        rbFavorite.setRating(1f);
+                        createSnackBar(R.string.movie_is_favorite);
+                        saveMovie();
+                    }
+                    return true;
+                } else {
+                    return false;
                 }
             }
-        };
+        });
 
         tvAverage.setText(average + "/10");
         createCircularReveal(x, y);
@@ -237,12 +236,14 @@ public class MovieDetailFragment extends Fragment {
     @UiThread
     void refreshCheckView(boolean isFavorite)
     {
-        chkFavorite.setChecked(isFavorite);
         if(isFavorite)
         {
-            chkFavorite.setText(R.string.is_favorite);
+            rbFavorite.setRating(1f);
         }
-        chkFavorite.setOnCheckedChangeListener(checkedChangeListener);
+        else
+        {
+            rbFavorite.setRating(0f);
+        }
     }
 
     @Background
@@ -446,7 +447,7 @@ public class MovieDetailFragment extends Fragment {
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        share = menu.findItem(R.id.share);
+        MenuItem share = menu.findItem(R.id.share);
         if(share != null)
         {
             share.setVisible(true);

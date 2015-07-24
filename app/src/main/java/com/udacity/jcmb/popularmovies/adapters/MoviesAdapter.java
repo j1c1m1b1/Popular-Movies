@@ -88,7 +88,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
     private Movie getMovieFromCursorAt(int position)
     {
         Movie movie = null;
-        if(cursor.moveToPosition(position))
+        if(!cursor.isClosed() && cursor.moveToPosition(position))
         {
             int id, year, duration;
             double average;
