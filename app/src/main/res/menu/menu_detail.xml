@@ -5,7 +5,7 @@
     tools:context=".MovieDetailActivity">
 
     <item
-        android:id="@+id/action_share"
+        android:id="@+id/share"
         android:icon="@drawable/ic_action_share"
         android:title="@string/share"
         app:showAsAction="collapseActionView|ifRoom"/>

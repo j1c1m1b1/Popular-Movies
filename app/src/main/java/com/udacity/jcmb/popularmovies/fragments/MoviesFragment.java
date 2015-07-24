@@ -263,9 +263,19 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         HomeActivity activity = (HomeActivity) getActivity();
         if(singleChoice)
         {
-            this.position = position;
-            adapter.setSelection(position);
+            setSelection(position);
         }
-        activity.onMovieChosen(movie, x, y, color);
+        activity.onMovieChosen(movie, x, y, color, position);
+    }
+
+    public void clearSelection()
+    {
+        this.position = -1;
+        adapter.setSelection(position);
+    }
+
+    public void setSelection(int position) {
+        this.position = position;
+        adapter.setSelection(position);
     }
 }

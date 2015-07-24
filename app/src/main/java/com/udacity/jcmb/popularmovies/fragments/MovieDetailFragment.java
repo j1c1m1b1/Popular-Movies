@@ -10,6 +10,9 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatCheckBox;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -120,6 +123,9 @@ public class MovieDetailFragment extends Fragment {
     @FragmentArg
     int color;
 
+    @FragmentArg
+    int position;
+
     private Movie movie;
 
     private ArrayList<Trailer> trailers;
@@ -130,9 +136,12 @@ public class MovieDetailFragment extends Fragment {
 
     private CompoundButton.OnCheckedChangeListener checkedChangeListener;
 
+    private MenuItem share;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         if(savedInstanceState != null && savedInstanceState.containsKey(MOVIE))
         {
             movie = savedInstanceState.getParcelable(MOVIE);
@@ -301,11 +310,6 @@ public class MovieDetailFragment extends Fragment {
     @UiThread
     void refreshMovieInfo()
     {
-        ActionBar actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
-        if(actionBar != null)
-        {
-            actionBar.setTitle(movie.getName());
-        }
         tvYear.setText("" + movie.getYear());
         tvDuration.setText("" + movie.getDuration());
         tvSynopsis.setText(movie.getSynopsis());
@@ -430,7 +434,26 @@ public class MovieDetailFragment extends Fragment {
         }
     }
 
-    @OptionsItem(R.id.action_share)
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        if(homeActivity != null)
+        {
+            inflater.inflate(R.menu.menu_home, menu);
+        }
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        share = menu.findItem(R.id.share);
+        if(share != null)
+        {
+            share.setVisible(true);
+        }
+    }
+
+    @OptionsItem(R.id.share)
     void share()
     {
         if(!trailers.isEmpty())
@@ -448,4 +471,6 @@ public class MovieDetailFragment extends Fragment {
             createSnackBar(R.string.no_trailers);
         }
     }
+
+
 }

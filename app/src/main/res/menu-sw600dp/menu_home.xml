@@ -12,7 +12,7 @@
         android:title="@string/favorites" app:showAsAction="never" />
 
     <item
-        android:id="@+id/action_share"
+        android:id="@+id/share"
         android:icon="@drawable/ic_action_share"
         android:title="@string/share"
         android:visible="false"

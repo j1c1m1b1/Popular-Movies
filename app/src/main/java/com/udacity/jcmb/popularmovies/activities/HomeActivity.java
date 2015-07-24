@@ -21,7 +21,6 @@ import com.udacity.jcmb.popularmovies.model.Movie;
 import com.udacity.jcmb.popularmovies.prefs.MyPrefs_;
 import com.udacity.jcmb.popularmovies.sync.PopularMoviesSyncAdapter;
 import com.udacity.jcmb.popularmovies.utils.AnimationUtils;
-import com.udacity.jcmb.popularmovies.utils.Utils;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
@@ -45,17 +44,39 @@ public class HomeActivity extends AppCompatActivity
 
     MoviesFragment fragmentMovies;
 
-    private MovieDetailFragment movieDetailFragment;
-
     private MenuItem menuShare;
+
+    private FragmentManager manager;
 
     @AfterViews
     void init()
     {
         boolean singleChoice = movieDetail != null;
 
-        FragmentManager manager = getSupportFragmentManager();
+        manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
+
+        manager.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+
+            int previousCount;
+
+            @Override
+            public void onBackStackChanged() {
+                int entryCount = manager.getBackStackEntryCount();
+                if(entryCount == 0)
+                {
+                    refreshActionBar();
+                    fragmentMovies.clearSelection();
+                }
+
+                else if(entryCount < previousCount)
+                {
+                    int position = Integer.parseInt(manager.getBackStackEntryAt(entryCount - 1).getName());
+                    fragmentMovies.setSelection(position);
+                }
+                previousCount = entryCount;
+            }
+        });
 
         fragmentMovies = MoviesFragment_.builder().singleChoice(singleChoice).build();
         fragmentMovies.setHasOptionsMenu(true);
@@ -67,11 +88,11 @@ public class HomeActivity extends AppCompatActivity
         PopularMoviesSyncAdapter.initializeSyncAdapter(this);
     }
 
-    public void onMovieChosen(Movie movie, int x, int y, int color) {
+    public void onMovieChosen(Movie movie, int x, int y, int color, int position) {
         FrameLayout movieDetail = (FrameLayout)findViewById(R.id.movieDetail);
         if(movieDetail != null)
         {
-            placeMovieDetailFragment(movie, color);
+            placeMovieDetailFragment(movie, color, position);
         }
         else
         {
@@ -109,45 +130,23 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
-    public void placeMovieDetailFragment(Movie movie, int color)
+    public void placeMovieDetailFragment(Movie movie, int color, int position)
     {
-        if(menuShare != null)
-        {
-            menuShare.setVisible(true);
-        }
-        if(getSupportActionBar() != null)
-        {
-            getSupportActionBar().setBackgroundDrawable(new ColorDrawable(color));
-        }
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-        {
-            int darkerColor = Utils.getDarkerColor(color);
-            getWindow().setStatusBarColor(darkerColor);
-        }
 
-        FragmentManager manager = getSupportFragmentManager();
-
-        manager.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
-            @Override
-            public void onBackStackChanged() {
-                if(movieDetailFragment.isDetached())
-                {
-                    refreshActionBar();
-                }
-            }
-        });
         FragmentTransaction transaction = manager.beginTransaction();
-        movieDetailFragment = MovieDetailFragment_.builder()
+        MovieDetailFragment movieDetailFragment = MovieDetailFragment_.builder()
                 .average(movie.getAverage())
                 .id(movie.getId())
                 .backdropFileName(movie.getBackdropFileName())
                 .imageFileName(movie.getImageFileName())
+                .color(color)
+                .position(position)
                 .build();
 
         movieDetailFragment.setHasOptionsMenu(true);
 
         transaction.replace(R.id.movieDetail, movieDetailFragment);
-        transaction.addToBackStack(null);
+        transaction.addToBackStack("" + position);
         transaction.commit();
     }
 
@@ -174,7 +173,7 @@ public class HomeActivity extends AppCompatActivity
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        menuShare = menu.findItem(R.id.action_share);
+        menuShare = menu.findItem(R.id.share);
         return super.onPrepareOptionsMenu(menu);
     }
 }
